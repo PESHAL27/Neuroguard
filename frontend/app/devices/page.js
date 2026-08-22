@@ -29,7 +29,7 @@ const getApiBaseUrl = () => {
 
 const getApiBaseCandidates = () => {
     if (typeof window === "undefined") {
-        return [process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"];
+        return [process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000", "http://localhost:3000"];
     }
 
     const candidates = [];
@@ -39,6 +39,9 @@ const getApiBaseCandidates = () => {
     if (envUrl) {
         candidates.push(envUrl);
     }
+
+    // Include relative origin for Next.js internal API routes
+    candidates.push("");
 
     candidates.push(`http://${hostname}:8000`);
 

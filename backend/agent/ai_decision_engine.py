@@ -43,7 +43,7 @@ async def evaluate_threat(threat_data: Dict[str, Any]) -> Dict[str, Any]:
     # Try AI decision
     decision_payload = _fallback_decision(threat_data)
 
-    if os.getenv("BEDROCK_API_KEY"):
+    if os.getenv("OPENROUTER_API_KEY"):
         try:
             ai_context = {
                 "event_type": "threat_evaluation",

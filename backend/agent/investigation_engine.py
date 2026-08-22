@@ -289,7 +289,7 @@ def _deep_ai_analysis(threat: Dict[str, Any], evidence: Dict[str, Any], affected
         },
     }
 
-    if not os.getenv("BEDROCK_API_KEY"):
+    if not (os.getenv("OPENROUTER_API_KEY") or os.getenv("BEDROCK_API_KEY")):
         return result
 
     try:

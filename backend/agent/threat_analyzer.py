@@ -47,7 +47,7 @@ def _json_safe(value):
 
 
 def _build_ai_summary(event_payload: dict, threat: dict) -> str:
-    if not os.getenv("BEDROCK_API_KEY"):
+    if not os.getenv("OPENROUTER_API_KEY"):
         return (
             f"{threat['severity']} confidence {threat['type'].replace('_', ' ')} detected against "
             f"{threat['targetDevice']}. Backend lifecycle checks confirmed the device was connected and monitored at ingest time."

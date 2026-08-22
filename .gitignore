@@ -2,6 +2,9 @@
 node_modules/
 dist/
 build/
+.next/
+*.log
 .env*
 venv/
 __pycache__/
+

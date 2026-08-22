@@ -282,8 +282,8 @@ export default function Investigations() {
                         <div className="absolute top-0 right-0 text-[80px] text-violet-500/5 rotate-12 -mt-2 mr-2 pointer-events-none font-black">AI</div>
                         <div className="flex items-center gap-2 mb-4">
                             {icons.cpu}
-                            <span className="text-white font-mono text-xs font-bold tracking-[0.15em] uppercase">Bedrock_AI_Analysis</span>
-                            <span className="ml-auto text-[9px] font-mono uppercase text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5">Claude Powered</span>
+                            <span className="text-white font-mono text-xs font-bold tracking-[0.15em] uppercase">NeuroGuard_AI_Analysis</span>
+                            <span className="ml-auto text-[9px] font-mono uppercase text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5">OpenRouter AI</span>
                         </div>
                         <div className="bg-[#111] border border-white/10 p-4 font-mono text-[11px] flex flex-col gap-2 rounded-md max-h-[200px] overflow-y-auto custom-scrollbar">
                             <div className="flex gap-2 text-white/30 mb-1 border-b border-white/10 pb-2">

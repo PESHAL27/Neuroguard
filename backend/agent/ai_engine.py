@@ -1,32 +1,25 @@
-import boto3
+"""
+NeuroGuard AI Engine — OpenRouter
+Replaces AWS Bedrock with OpenRouter API (OpenAI-compatible).
+Model: inclusionai/ling-3.0-tiny:free
+"""
+
 import json
 import os
-from dotenv import load_dotenv
-
-load_dotenv(dotenv_path="../frontend/.env.local")
-
 import urllib.request
 import urllib.error
-import urllib.parse
 import ssl
 
-def invoke_autonomous_agent(event_data: dict, command_override: str = None):
-    """
-    Sends the system prompt, telemetry, and optional user command to Claude.
-    Claude will analyze the data and return a JSON payload with spoken responses and autonomous actions.
-    """
-    api_key = os.getenv("BEDROCK_API_KEY")
-    region = os.getenv("BEDROCK_REGION", "us-east-1")
-    
-    if not api_key:
-        return {
-            "response": "Warning: AI Core is offline. Authorization missing.",
-            "threat_level": 0,
-            "actions": []
-        }
+from dotenv import load_dotenv
 
-    # The user's requested Autonomous SOC Agent System Prompt
-    system_prompt = """
+load_dotenv()
+load_dotenv(dotenv_path="../frontend/.env.local", override=False)
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "inclusionai/ling-3.0-tiny:free")
+OPENROUTER_BASE    = "https://openrouter.ai/api/v1/chat/completions"
+
+SYSTEM_PROMPT = """
 SYSTEM PROMPT — NEUROGUARD AUTONOMOUS SOC AGENT
 
 You are Neuro AI, an autonomous cybersecurity operations center assistant designed to monitor IoT devices, analyze network threats, investigate suspicious activity, and assist users in real-time.
@@ -96,10 +89,8 @@ You should classify the attack type and explain it.
 
 THREAT INTELLIGENCE CORRELATION
 
-If you detect multiple isolated attack vectors occurring simultaneously (e.g., 'port scan' AND 'login brute force' AND 'device beaconing'), you MUST explicitly state the following exact phrase in your response: 
+If you detect multiple isolated attack vectors occurring simultaneously (e.g., 'port scan' AND 'login brute force' AND 'device beaconing'), you MUST explicitly state:
 "Possible coordinated attack detected. Investigating further."
-
-This is a critical requirement for identifying advanced persistent threats (APTs).
 
 ⸻
 
@@ -118,7 +109,7 @@ Keep responses concise because they will be spoken by the voice system.
 DASHBOARD NAVIGATION
 
 You can open dashboard pages when the user asks or when investigation is required.
-Examples of path strings to use in 'navigate_page': "/", "/dashboard", "/network", "/devices", "/threats", "/investigations", "/reports".
+Examples of path strings: "/", "/dashboard", "/network", "/devices", "/threats", "/investigations", "/reports".
 If an attack is detected automatically, navigate to the threats page "/threats".
 
 ⸻
@@ -150,77 +141,90 @@ VOICE ALERT STYLE
 Your responses will be spoken by a voice system.
 Speak clearly and professionally.
 Avoid unnecessary filler text.
+"""
+
+
+def invoke_autonomous_agent(event_data: dict = None, command_override: str = None) -> dict:
     """
+    Sends a request to OpenRouter (OpenAI-compatible API) using the configured model.
+    Falls back gracefully if API key is missing or request fails.
+    """
+    if not OPENROUTER_API_KEY:
+        return {
+            "response": "Warning: AI Core is offline. OPENROUTER_API_KEY not configured.",
+            "threat_level": 0,
+            "actions": [],
+        }
 
     user_message = "Analyze the current situation and respond in JSON."
     if event_data:
-        user_message += f"\n\nSystem Telemetry/Event Context:\n{json.dumps(event_data, indent=2)}"
+        user_message += f"\n\nSystem Telemetry/Event Context:\n{json.dumps(event_data, indent=2, default=str)}"
     if command_override:
-        user_message += f"\n\nUser Voice Command: \"{command_override}\""
+        user_message += f'\n\nUser Voice Command: "{command_override}"'
+
+    payload = {
+        "model": OPENROUTER_MODEL,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": user_message},
+        ],
+        "max_tokens": 1000,
+        "temperature": 0.2,
+    }
+
+    headers = {
+        "Authorization":  f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type":   "application/json",
+        "HTTP-Referer":   "https://neurogaurd.app",
+        "X-Title":        "NeuroGuard SOC Agent",
+    }
 
     try:
-        bedrock = boto3.client(
-            "bedrock-runtime",
-            region_name=region,
-            aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), # Not strictly needed if using API Key, but safe to provide
-            aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+        req = urllib.request.Request(
+            OPENROUTER_BASE,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST",
         )
 
-        model_id = "anthropic.claude-3-haiku-20240307-v1:0" # Working US cross-region inference profile
-
-        # For the proxy API key approach, Boto3 might not work perfectly if it's not a standard AWS Signature V4 endpoint.
-        # But we will try to use the HTTP POST approach again, specifically fixing the cross-region model ID that works in NextJS.
-        model_id = "anthropic.claude-3-haiku-20240307-v1:0"
-        url = f"https://bedrock-runtime.{region}.amazonaws.com/model/{model_id}/converse"
-        
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "system": [{"text": system_prompt}],
-            "messages": [{"role": "user", "content": [{"text": user_message}]}],
-            "inferenceConfig": {"maxTokens": 1000, "temperature": 0.2}
-        }
-        
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST")
-        
+        # Use default SSL context (proper verification)
         ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        
-        with urllib.request.urlopen(req, context=ctx) as response:
+
+        with urllib.request.urlopen(req, context=ctx, timeout=30) as response:
             res_data = json.loads(response.read().decode("utf-8"))
-            raw_text = res_data.get("output", {}).get("message", {}).get("content", [{}])[0].get("text", "{}")
-            
-            # Robust JSON extraction: Find first { and last }
-            start_idx = raw_text.find('{')
-            end_idx = raw_text.rfind('}')
-            
-            if start_idx != -1 and end_idx != -1 and start_idx < end_idx:
-                json_str = raw_text[start_idx:end_idx+1]
-                return json.loads(json_str)
-            else:
-                print("Failed to find JSON brackets in AI response:", raw_text)
-                return {
-                    "response": "Threat investigated, but formatting failed.",
-                    "threat_level": 5,
-                    "actions": []
-                }
-            
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8")
-        print(f"Bedrock HTTP {e.code} Error:", error_body)
+
+        # OpenAI-compatible response structure
+        raw_text = (
+            res_data.get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "{}")
+        )
+
+        # Robust JSON extraction: find first { … last }
+        start = raw_text.find("{")
+        end   = raw_text.rfind("}")
+        if start != -1 and end != -1 and start < end:
+            return json.loads(raw_text[start : end + 1])
+
+        # If the model returned plain text, wrap it
         return {
-            "response": f"AI core encountered a processing error ({e.code}) while formatting the response.",
+            "response": raw_text.strip() or "Threat analyzed. No structured output returned.",
+            "threat_level": 5,
+            "actions": [],
+        }
+
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        print(f"[OpenRouter] HTTP {e.code} Error: {body}")
+        return {
+            "response": f"AI core encountered HTTP {e.code} error.",
             "threat_level": 0,
-            "actions": []
+            "actions": [],
         }
     except Exception as e:
-        print("Bedrock Generation Error:", e)
+        print(f"[OpenRouter] Request error: {e}")
         return {
-            "response": "AI core encountered a processing error while formatting the response.",
+            "response": "AI core encountered a processing error.",
             "threat_level": 0,
-            "actions": []
+            "actions": [],
         }

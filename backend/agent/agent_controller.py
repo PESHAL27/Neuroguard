@@ -9,8 +9,22 @@ from agent.tools import (
     get_predictions
 )
 from agent.ai_engine import invoke_autonomous_agent
-from agent.polly_engine import synthesize_speech
 import json
+
+# Try importing Polly — optional, only works if AWS creds are configured
+try:
+    from agent.polly_engine import synthesize_speech as _polly_synthesize
+except Exception:
+    _polly_synthesize = None
+
+def synthesize_speech(text: str):
+    """Use Polly if available, otherwise return None (browser TTS fallback)."""
+    if _polly_synthesize:
+        try:
+            return _polly_synthesize(text)
+        except Exception:
+            pass
+    return None
 
 # Map string tool names from Claude's JSON to actual Python functions
 AVAILABLE_TOOLS = {
