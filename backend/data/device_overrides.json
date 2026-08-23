@@ -9,7 +9,7 @@
     "ip": "192.168.31.207",
     "name": "Realme NARZO 80 Lite 5G",
     "mac": "56:4B:D3:92:7A:39",
-    "last_seen": "2026-08-23T07:21:38.560Z",
+    "last_seen": "2026-08-23T07:51:35.723Z",
     "blocked": false,
     "connected": true,
     "monitor": true,
@@ -39,5 +39,35 @@
     "name": "Connected Device (202)",
     "mac": "20:E7:C8:AB:7F:08",
     "last_seen": "2026-08-23T07:41:30.674Z"
+  },
+  "device_1407083582c9": {
+    "blocked": false,
+    "connected": true,
+    "monitor": true,
+    "status": "connected",
+    "quarantined_at": null,
+    "blocked_reason": null,
+    "device_id": "device_1407083582c9",
+    "ip": "192.168.31.91",
+    "name": "Smart IoT Sensor Node",
+    "mac": "14:07:08:35:82:C9",
+    "last_seen": "2026-08-23T07:51:25.702Z",
+    "trusted": true,
+    "surveillance": false,
+    "surveillance_level": "High",
+    "surveillance_started": "2026-08-23T07:50:43.473Z"
+  },
+  "device_a2b56eb4318e": {
+    "blocked": false,
+    "connected": true,
+    "monitor": true,
+    "status": "connected",
+    "quarantined_at": null,
+    "blocked_reason": null,
+    "device_id": "device_a2b56eb4318e",
+    "ip": "192.168.31.119",
+    "name": "Connected Device (119)",
+    "mac": "A2:B5:6E:B4:31:8E",
+    "last_seen": "2026-08-23T07:49:57.002Z"
   }
 }
