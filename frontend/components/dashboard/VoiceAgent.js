@@ -6,13 +6,10 @@ import { useRouter } from "next/navigation";
 
 export default function VoiceAgent() {
     const [isListening, setIsListening] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    const [transcript, setTranscript] = useState("Hello! I am NeuroGuard AI. Click to speak or type a command.");
-    const [textInput, setTextInput] = useState("");
-    const [showInput, setShowInput] = useState(false);
-    const [hasSpeechSupport, setHasSpeechSupport] = useState(false);
+    const [transcript, setTranscript] = useState("Tap orb to speak");
+    const [spokenResponse, setSpokenResponse] = useState("");
 
     const recognitionRef = useRef(null);
     const isListeningRef = useRef(false);
@@ -35,7 +32,7 @@ export default function VoiceAgent() {
             );
             if (preferredVoice) speech.voice = preferredVoice;
 
-            speech.rate = 1.0;
+            speech.rate = 1.02;
             speech.pitch = 1.0;
 
             speech.onend = () => setIsSpeaking(false);
@@ -63,31 +60,32 @@ export default function VoiceAgent() {
             const data = await res.json();
             setIsThinking(false);
 
-            const replyMessage = data.message || "Command processed.";
+            const replyMessage = data.message || "Command executed.";
+            setSpokenResponse(replyMessage);
             setTranscript(replyMessage);
             speakText(replyMessage);
 
-            // Execute actions (like navigation)
+            // Execute voice navigation actions
             if (data.actions && Array.isArray(data.actions)) {
                 for (const action of data.actions) {
                     if (action.type === "navigate" && action.page) {
                         setTimeout(() => {
                             router.push(action.page);
-                        }, 700);
+                        }, 750);
                     }
                 }
             }
         } catch (err) {
-            console.error("AI Agent Error:", err);
+            console.error("AI Voice Assistant Error:", err);
             setIsThinking(false);
-            setTranscript("Could not reach AI core.");
-            speakText("Could not reach AI core. Please check network connection.");
+            const errMsg = "Connection to AI core failed.";
+            setTranscript(errMsg);
+            speakText(errMsg);
         }
     };
 
     useEffect(() => {
         if (typeof window !== "undefined" && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-            setHasSpeechSupport(true);
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognitionRef.current = new SpeechRecognition();
             recognitionRef.current.continuous = false;
@@ -118,8 +116,7 @@ export default function VoiceAgent() {
                 setIsListening(false);
                 isListeningRef.current = false;
                 if (event.error === 'not-allowed') {
-                    setTranscript("Microphone permission denied. Use text box below.");
-                    setShowInput(true);
+                    setTranscript("Mic access blocked. Enable permissions.");
                 }
             };
 
@@ -127,221 +124,152 @@ export default function VoiceAgent() {
                 setIsListening(false);
                 isListeningRef.current = false;
             };
-        } else {
-            setHasSpeechSupport(false);
         }
     }, [router]);
 
-    const handleOrbClick = () => {
-        setIsOpen(prev => !prev);
-        if (!isOpen) {
-            startListening();
-        } else {
-            stopListening();
-        }
-    };
-
-    const startListening = () => {
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-        }
-        setIsSpeaking(false);
-        if (recognitionRef.current) {
-            try {
-                recognitionRef.current.start();
-            } catch (e) {
-                // If already running or error, toggle input
-                setShowInput(true);
+    const toggleVoice = () => {
+        if (isListening) {
+            // Stop listening
+            if (recognitionRef.current) {
+                try { recognitionRef.current.stop(); } catch (e) {}
             }
+            if (typeof window !== "undefined" && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            setIsListening(false);
+            isListeningRef.current = false;
+            setIsSpeaking(false);
+            setTranscript("Tap orb to speak");
         } else {
-            setShowInput(true);
-            setTranscript("Voice input not supported in this browser. Type below:");
+            // Start listening
+            if (typeof window !== "undefined" && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            setIsSpeaking(false);
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.start();
+                } catch (e) {
+                    try {
+                        recognitionRef.current.stop();
+                        setTimeout(() => recognitionRef.current.start(), 100);
+                    } catch (err) {}
+                }
+            } else {
+                setTranscript("Voice recognition not supported in this browser.");
+            }
         }
     };
 
-    const stopListening = () => {
-        if (recognitionRef.current) {
-            try { recognitionRef.current.stop(); } catch (e) {}
-        }
-        if (typeof window !== "undefined" && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-        }
-        setIsListening(false);
-        isListeningRef.current = false;
-        setIsSpeaking(false);
-    };
-
-    const handleTextSubmit = (e) => {
-        e.preventDefault();
-        if (textInput.trim()) {
-            processCommand(textInput);
-            setTextInput("");
-        }
-    };
-
-    const quickActions = [
-        { label: "Dashboard", cmd: "go to dashboard" },
-        { label: "Devices", cmd: "go to devices" },
-        { label: "Network", cmd: "go to network" },
-        { label: "Threats", cmd: "go to threats" },
-        { label: "Investigations", cmd: "go to investigations" },
-        { label: "Reports", cmd: "go to reports" },
-    ];
+    const isVisible = isListening || isThinking || isSpeaking;
 
     return (
-        <div className="fixed bottom-6 right-6 z-[999] pointer-events-auto">
+        <div className="fixed bottom-6 right-6 z-[999] pointer-events-auto select-none">
             <div className="relative flex items-center justify-end">
-                {/* Assistant Chat / Voice Dialogue Box */}
+                {/* Floating Holographic Voice HUD Tooltip (Pure Voice Feedback) */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    initial={{ opacity: 0, scale: 0.85, x: 20 }}
                     animate={{
-                        opacity: isOpen ? 1 : 0,
-                        scale: isOpen ? 1 : 0.9,
-                        y: isOpen ? 0 : 10,
-                        pointerEvents: isOpen ? "auto" : "none"
+                        opacity: isVisible ? 1 : 0,
+                        scale: isVisible ? 1 : 0.85,
+                        x: isVisible ? -16 : 20,
+                        pointerEvents: isVisible ? "auto" : "none"
                     }}
-                    transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                    className="absolute bottom-[90px] right-0 overflow-hidden w-[320px] md:w-[380px] shadow-2xl rounded-3xl bg-[#0a0f1d]/95 backdrop-blur-2xl border border-cyan-500/30 p-5 flex flex-col gap-3"
+                    transition={{ type: "spring", stiffness: 260, damping: 22 }}
+                    className="absolute right-[85px] origin-right overflow-hidden shadow-2xl rounded-2xl bg-black/80 backdrop-blur-2xl border border-cyan-500/30 px-4 py-3 min-w-[220px] max-w-[320px]"
                     style={{
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.2)"
+                        boxShadow: "0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(6,182,212,0.2)"
                     }}
                 >
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-                                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                            </div>
-                            <span className="text-xs font-bold tracking-wider text-white uppercase">NeuroGuard Voice AI</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowInput(!showInput)}
-                                className="text-[11px] text-cyan-400 hover:text-cyan-300 font-mono bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded-md transition-colors"
-                            >
-                                {showInput ? "🎙️ Voice Mode" : "⌨️ Text"}
-                            </button>
-                            <button
-                                onClick={() => { setIsOpen(false); stopListening(); }}
-                                className="text-white/40 hover:text-white text-xs px-1.5 py-0.5 rounded transition-colors"
-                            >
-                                ✕
-                            </button>
+                    <div className="flex items-center justify-between gap-2 mb-1.5 border-b border-white/10 pb-1">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 font-mono">
+                            Neuro AI Voice
+                        </span>
+                        {/* Dynamic Soundwave Equalizer */}
+                        <div className="flex items-center gap-0.5 h-3">
+                            <span className={`w-0.5 bg-cyan-400 rounded-full transition-all ${isSpeaking ? "h-3 animate-bounce" : isListening ? "h-2 animate-pulse" : "h-1"}`} />
+                            <span className={`w-0.5 bg-cyan-300 rounded-full transition-all ${isSpeaking ? "h-4 animate-bounce delay-75" : isListening ? "h-3 animate-pulse" : "h-1"}`} />
+                            <span className={`w-0.5 bg-purple-400 rounded-full transition-all ${isSpeaking ? "h-2.5 animate-bounce delay-150" : isListening ? "h-2 animate-pulse" : "h-1"}`} />
+                            <span className={`w-0.5 bg-cyan-400 rounded-full transition-all ${isSpeaking ? "h-3.5 animate-bounce delay-100" : isListening ? "h-1.5 animate-pulse" : "h-1"}`} />
                         </div>
                     </div>
 
-                    {/* Speech / Transcript Area */}
-                    <div className="bg-black/40 rounded-2xl p-3.5 border border-white/5 min-h-[60px] flex items-center justify-between">
-                        <p className="text-xs text-white/90 leading-relaxed font-medium">
-                            {isThinking ? (
-                                <span className="text-purple-300 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping" />
-                                    Analyzing network telemetry...
-                                </span>
-                            ) : isListening ? (
-                                <span className="text-cyan-300 flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                                    Listening to your voice... Speak now!
-                                </span>
-                            ) : (
-                                transcript
-                            )}
-                        </p>
-                    </div>
-
-                    {/* Microphone Controls */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={isListening ? stopListening : startListening}
-                            className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${isListening ? "bg-rose-500/30 text-rose-300 border border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] animate-pulse" : "bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:brightness-110"}`}
-                        >
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                            </svg>
-                            {isListening ? "Stop Listening" : "Tap to Speak"}
-                        </button>
-                    </div>
-
-                    {/* Text Input Option */}
-                    {showInput && (
-                        <form onSubmit={handleTextSubmit} className="flex gap-1.5 mt-0.5">
-                            <input
-                                type="text"
-                                value={textInput}
-                                onChange={(e) => setTextInput(e.target.value)}
-                                placeholder="Type e.g. 'go to devices' or 'is network safe?'"
-                                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-3 py-1.5 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-400"
-                                autoFocus
-                            />
-                            <button
-                                type="submit"
-                                className="bg-cyan-500 hover:bg-cyan-400 text-black px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                            >
-                                Send
-                            </button>
-                        </form>
-                    )}
-
-                    {/* Quick Voice Navigation Shortcuts */}
-                    <div className="flex flex-wrap gap-1.5 pt-1 border-t border-white/10">
-                        <span className="text-[10px] text-white/40 uppercase tracking-wider w-full mb-0.5">Quick Voice Commands:</span>
-                        {quickActions.map(act => (
-                            <button
-                                key={act.label}
-                                onClick={() => processCommand(act.cmd)}
-                                className="text-[10px] bg-white/5 hover:bg-white/15 text-white/70 hover:text-white px-2 py-1 rounded-lg border border-white/10 transition-colors cursor-pointer"
-                            >
-                                {act.label}
-                            </button>
-                        ))}
-                    </div>
+                    <p className="text-xs text-white/90 font-medium leading-snug">
+                        {isThinking ? (
+                            <span className="text-purple-300 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+                                Processing command...
+                            </span>
+                        ) : isListening ? (
+                            <span className="text-cyan-300 flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                                Listening... Speak now
+                            </span>
+                        ) : (
+                            transcript
+                        )}
+                    </p>
                 </motion.div>
 
-                {/* The Floating Glowing 3D AI Orb Button */}
+                {/* Pure Floating Glowing 3D AI Voice Orb */}
                 <button
-                    onClick={handleOrbClick}
+                    onClick={toggleVoice}
                     className="relative group outline-none cursor-pointer"
                     style={{ WebkitTapHighlightColor: "transparent" }}
-                    title="Open Neuro Voice Assistant"
+                    title={isListening ? "Listening... Click to stop" : "Click to speak with Neuro AI Assistant"}
                 >
                     <motion.div
-                        className="w-[76px] h-[76px] flex items-center justify-center relative transition-all duration-300"
+                        className="w-[78px] h-[78px] flex items-center justify-center relative transition-all duration-300"
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.92 }}
                         animate={{
-                            filter: isSpeaking ? "drop-shadow(0 0 30px rgba(52, 211, 153, 0.9))" : isListening ? "drop-shadow(0 0 30px rgba(6, 182, 212, 0.9))" : isThinking ? "drop-shadow(0 0 30px rgba(192, 132, 252, 0.9))" : "drop-shadow(0 0 20px rgba(124, 58, 237, 0.7))"
+                            filter: isSpeaking
+                                ? "drop-shadow(0 0 35px rgba(52, 211, 153, 0.95))"
+                                : isListening
+                                    ? "drop-shadow(0 0 35px rgba(6, 182, 212, 0.95))"
+                                    : isThinking
+                                        ? "drop-shadow(0 0 35px rgba(192, 132, 252, 0.95))"
+                                        : "drop-shadow(0 0 20px rgba(124, 58, 237, 0.75))"
                         }}
                     >
-                        {/* Wavy rotating rings */}
+                        {/* Wavy acoustic aura ring 1 */}
                         <motion.div
-                            className="absolute inset-0 rounded-[40%_60%_70%_30%] border-[3px] border-[#7c3aed]/80 blur-[2px]"
+                            className={`absolute inset-0 rounded-[40%_60%_70%_30%] border-[3px] blur-[2px] transition-colors duration-500 ${isListening ? "border-cyan-400" : isSpeaking ? "border-emerald-400" : "border-[#7c3aed]/80"}`}
                             animate={{ rotate: 360 }}
-                            transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+                            transition={{ repeat: Infinity, duration: isListening ? 4 : 8, ease: "linear" }}
                         />
+                        {/* Wavy acoustic aura ring 2 */}
                         <motion.div
-                            className="absolute inset-[-3px] rounded-[60%_40%_30%_70%] border-[3px] border-[#06b6d4]/70 blur-[2px]"
+                            className={`absolute inset-[-3px] rounded-[60%_40%_30%_70%] border-[3px] blur-[2px] transition-colors duration-500 ${isListening ? "border-blue-400" : isSpeaking ? "border-teal-300" : "border-[#06b6d4]/70"}`}
                             animate={{ rotate: -360 }}
-                            transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+                            transition={{ repeat: Infinity, duration: isListening ? 5 : 10, ease: "linear" }}
                         />
 
-                        {/* Core Glass Sphere */}
+                        {/* Core Glass Sphere with 3D Depth */}
                         <div
                             className="absolute inset-2 rounded-full border border-white/40 overflow-hidden"
                             style={{
-                                background: "radial-gradient(circle at 35% 35%, #e0f2fe 0%, #a5b4fc 40%, #818cf8 80%, #4f46e5 100%)",
-                                boxShadow: "inset -8px -8px 16px rgba(0,0,0,0.15), inset 8px 8px 16px rgba(255,255,255,0.9)"
+                                background: isListening
+                                    ? "radial-gradient(circle at 35% 35%, #cffafe 0%, #38bdf8 40%, #0284c7 80%, #0369a1 100%)"
+                                    : isSpeaking
+                                        ? "radial-gradient(circle at 35% 35%, #d1fae5 0%, #34d399 40%, #059669 80%, #047857 100%)"
+                                        : "radial-gradient(circle at 35% 35%, #e0f2fe 0%, #a5b4fc 40%, #818cf8 80%, #4f46e5 100%)",
+                                boxShadow: "inset -8px -8px 16px rgba(0,0,0,0.2), inset 8px 8px 16px rgba(255,255,255,0.9)"
                             }}
                         >
                             <div className="absolute top-[8%] left-[15%] w-[45%] h-[35%] bg-white/70 rounded-full blur-[2px] rotate-[-40deg]" />
                         </div>
 
-                        {/* Microphone / AI Icon */}
+                        {/* Centered Voice Microphone Icon */}
                         <div className="absolute inset-2 z-10 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white drop-shadow-md">
-                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-                            </svg>
+                            {isListening ? (
+                                <span className="w-4 h-4 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,1)] animate-ping" />
+                            ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white drop-shadow-md">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                                </svg>
+                            )}
                         </div>
                     </motion.div>
                 </button>

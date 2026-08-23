@@ -15,11 +15,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 50,
+    "latency_ms": 196,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_76",
@@ -37,11 +37,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 1417,
+    "latency_ms": 196,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_91",
@@ -59,11 +59,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 50,
+    "latency_ms": 204,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_103",
@@ -85,7 +85,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_119",
@@ -107,7 +107,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_144",
@@ -125,11 +125,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 500,
+    "latency_ms": 50,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_158",
@@ -151,7 +151,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_168",
@@ -169,11 +169,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 50,
+    "latency_ms": 196,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_173",
@@ -191,11 +191,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 599,
+    "latency_ms": 196,
     "network_usage": 3200,
     "connections": 12,
     "cpu": 85,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   },
   {
     "_id": "dev_device_192_168_31_207",
@@ -217,6 +217,6 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T08:21:59Z"
+    "last_seen": "2026-08-23T08:55:57Z"
   }
 ]
