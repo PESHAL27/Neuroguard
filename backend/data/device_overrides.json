@@ -69,5 +69,21 @@
     "name": "Connected Device (119)",
     "mac": "A2:B5:6E:B4:31:8E",
     "last_seen": "2026-08-23T07:49:57.002Z"
+  },
+  "device_10_185_191_199": {
+    "ip": "10.185.191.199",
+    "blocked": true,
+    "trusted": false,
+    "surveillance": false,
+    "reason": "Exceeded burst rate threshold (6 reqs in 3s) targeting ESP32 Camera.",
+    "blocked_at": "2026-08-23T11:20:37.265Z"
+  },
+  "10.185.191.199": {
+    "ip": "10.185.191.199",
+    "blocked": true,
+    "trusted": false,
+    "surveillance": false,
+    "reason": "Exceeded burst rate threshold (6 reqs in 3s) targeting ESP32 Camera.",
+    "blocked_at": "2026-08-23T11:20:37.265Z"
   }
 }

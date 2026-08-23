@@ -1,0 +1,21 @@
+[
+  {
+    "_id": "thr_esp_1787484037295",
+    "id": "thr_esp_1787484037295",
+    "type": "IoT Flooding / DoS Attack on ESP32 Camera",
+    "severity": "critical",
+    "status": "active",
+    "source_ip": "10.185.191.199",
+    "source_country": "Local IoT Mesh",
+    "target_device": "ESP32 OV2640 Camera Node",
+    "target_ip": "10.185.191.90",
+    "description": "Attacking ESP32 sent 6 rapid packets in < 3s, exceeding safety baseline (threshold: 5 msgs). Target ESP32 Camera protected.",
+    "mitre_tactic": "Impact (TA0040)",
+    "mitre_id": "T1498.001",
+    "confidence_score": 99,
+    "timestamp": "2026-08-23T11:20:37.295Z",
+    "mitigated": false,
+    "action_taken": "Autonomous Firewall Quarantine Applied",
+    "threat_source": "Threat ESP32 Microcontroller"
+  }
+]

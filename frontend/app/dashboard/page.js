@@ -1,38 +1,52 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import SecurityStatusCards from "@/components/dashboard/SecurityStatusCards";
 import ThreatMonitorFeed from "@/components/dashboard/ThreatMonitorFeed";
 import DeviceStatusPanel from "@/components/dashboard/DeviceStatusPanel";
 import AttackTimeline from "@/components/dashboard/AttackTimeline";
 import AIAnalysisPanel from "@/components/dashboard/AIAnalysisPanel";
 import AutoResponseLog from "@/components/dashboard/AutoResponseLog";
-import SecurityAnalyticsCharts from "@/components/dashboard/SecurityAnalyticsCharts";
 import HardwareStatusIndicators from "@/components/dashboard/HardwareStatusIndicators";
 import AttackMap from "@/components/dashboard/AttackMap";
 import AttackGraph from "@/components/dashboard/AttackGraph";
 import AIPredictionsPanel from "@/components/dashboard/AIPredictionsPanel";
 import { fetchApi } from "@/lib/api";
+
 export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
+    const [activeIncident, setActiveIncident] = useState(null);
 
     useEffect(() => {
         setMounted(true);
+
+        const checkIncidents = async () => {
+            try {
+                const res = await fetch("/api/threats");
+                if (res.ok) {
+                    const threats = await res.json();
+                    if (Array.isArray(threats)) {
+                        const critical = threats.find(t => t.severity === "critical" && t.status === "active");
+                        setActiveIncident(critical || null);
+                    }
+                }
+            } catch (e) {}
+        };
+
+        checkIncidents();
+        const interval = setInterval(checkIncidents, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     return (
         <div className="min-h-screen w-full bg-[#0a0a0a] text-white relative overflow-hidden">
-            {/* Ambient background effects - Vibrant Orbs for Liquid Glass */}
-            {/* Added transform-gpu to prevent Safari from repainting/refreshing continuously on scroll */}
+            {/* Ambient background effects */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 transform-gpu">
-                {/* Top left purple/pink */}
                 <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-fuchsia-600/30 rounded-full blur-[120px] mix-blend-screen transform-gpu" />
-                {/* Center right vibrant blue */}
                 <div className="absolute top-[20%] right-[5%] w-[40%] h-[60%] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen transform-gpu" />
-                {/* Bottom left emerald/teal */}
                 <div className="absolute bottom-[-10%] left-[10%] w-[60%] h-[50%] bg-teal-500/20 rounded-full blur-[140px] mix-blend-screen transform-gpu" />
-                {/* Top right orange highlight */}
                 <div className="absolute top-[5%] right-[30%] w-[30%] h-[30%] bg-orange-500/15 rounded-full blur-[100px] mix-blend-screen transform-gpu" />
             </div>
 
@@ -42,7 +56,7 @@ export default function Dashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="mb-8 relative z-20"
+                    className="mb-6 relative z-20"
                 >
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
                         <div>
@@ -54,12 +68,11 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={async () => {
-                                    if (confirm("Clear all threat simulation data? Registered devices will remain.")) {
+                                    if (confirm("Reset threat records and clear active alarms?")) {
                                         try {
-                                            await fetchApi("/api/clear-history", { method: "POST" });
-                                        } catch (e) {
-                                            console.error(e);
-                                        }
+                                            await fetch("/api/clear-history", { method: "POST" });
+                                            setActiveIncident(null);
+                                        } catch (e) {}
                                     }
                                 }}
                                 className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-rose-600/20 hover:bg-rose-600/30 transition-colors border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)] cursor-pointer"
@@ -79,6 +92,57 @@ export default function Dashboard() {
                     </div>
                 </motion.div>
 
+                {/* Real-time Threat Siren Banner (Flashes during ESP32 / Network Attacks) */}
+                <AnimatePresence>
+                    {activeIncident && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            className="mb-6 rounded-3xl bg-gradient-to-r from-rose-950/80 via-red-900/60 to-rose-950/80 border-2 border-rose-500/60 p-4 md:p-5 shadow-[0_0_40px_rgba(244,63,94,0.4)] relative overflow-hidden backdrop-blur-xl"
+                        >
+                            <div className="absolute inset-0 bg-rose-500/10 animate-pulse pointer-events-none" />
+                            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(244,63,94,0.6)]">
+                                        <span className="text-2xl animate-bounce">🚨</span>
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-rose-500 text-white shadow-[0_0_10px_rgba(244,63,94,0.8)]">
+                                                Active Anomaly Intercepted
+                                            </span>
+                                            <span className="text-xs text-rose-300 font-mono">
+                                                MITRE {activeIncident.mitre_id || "T1498"}
+                                            </span>
+                                        </div>
+                                        <h4 className="text-base font-bold text-white mt-1">
+                                            {activeIncident.type || "Critical IoT Attack"} ➔ Target: {activeIncident.target_device || "ESP32 Camera"}
+                                        </h4>
+                                        <p className="text-xs text-rose-200/80 mt-0.5">
+                                            Source: <span className="font-mono text-white font-bold">{activeIncident.source_ip}</span> • Action: <span className="text-emerald-400 font-bold">{activeIncident.action_taken || "Autonomous Quarantine Enforced"}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2.5 self-end md:self-center">
+                                    <Link
+                                        href="/threats"
+                                        className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white text-xs font-bold transition-all shadow-[0_0_15px_rgba(244,63,94,0.5)] flex items-center gap-1.5"
+                                    >
+                                        Inspect Threat Radar ➔
+                                    </Link>
+                                    <Link
+                                        href="/devices"
+                                        className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-colors border border-white/20"
+                                    >
+                                        View Quarantined Node
+                                    </Link>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {/* Security Status Cards - Top Row */}
                 <div className="mb-6">
                     <SecurityStatusCards />
@@ -88,34 +152,20 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Left Column - 2/3 width */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* New Advanced SOC Visualizations */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <AttackMap />
                             <AttackGraph />
                         </div>
-
-                        {/* Threat Monitor Feed */}
                         <ThreatMonitorFeed />
-
-                        {/* AI Analysis Panel */}
                         <AIAnalysisPanel />
                     </div>
 
                     {/* Right Column - 1/3 width */}
                     <div className="space-y-6">
-                        {/* Device Status */}
                         <DeviceStatusPanel />
-
-                        {/* Attack Timeline */}
                         <AttackTimeline />
-
-                        {/* Hardware Status */}
                         <HardwareStatusIndicators />
-
-                        {/* AI Predictions */}
                         <AIPredictionsPanel />
-
-                        {/* Auto Response Log */}
                         <AutoResponseLog />
                     </div>
                 </div>
