@@ -199,48 +199,42 @@ export default function Devices() {
     };
 
     useEffect(() => {
-        const apiBaseUrl = getApiBaseUrl();
-        const wsBaseUrl = getWsBaseUrl();
         let pollTimer;
         let statsTimer;
+        let eventSource;
 
         loadDevices();
         loadStats();
-        pollTimer = setInterval(loadDevices, 5000);
-        statsTimer = setInterval(loadStats, 10000);
+        // Fast polling fallback every 1.5s for instant reactivity
+        pollTimer = setInterval(loadDevices, 1500);
+        statsTimer = setInterval(loadStats, 5000);
 
-        let socket;
-        let reconnectTimer;
-        
-        const connectWs = () => {
-            socket = new WebSocket(`${wsBaseUrl}/ws/devices`);
-            socket.onopen = () => {
-                setConnectionMode("websocket");
-                if (reconnectTimer) clearTimeout(reconnectTimer);
+        // SSE Real-time Live Network Stream
+        try {
+            eventSource = new EventSource("/api/devices/stream");
+            eventSource.onopen = () => {
+                setConnectionMode("live_stream");
             };
-            socket.onmessage = (event) => {
+            eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    // Prevent duplicate devices using primary _id to avoid masking distinct DB entries
-                    const uniqueData = Array.from(new Map(data.map(item => [item._id || item.device_id || item.mac || item.id, item])).values());
-                    setDevices(uniqueData);
-                } catch (e) {
-                    console.error("WebSocket message parsing error:", e);
-                }
+                    if (Array.isArray(data)) {
+                        const uniqueData = Array.from(new Map(data.map(item => [item._id || item.device_id || item.mac || item.id, item])).values());
+                        setDevices(uniqueData);
+                    }
+                } catch (e) {}
             };
-            socket.onerror = () => setConnectionMode("polling");
-            socket.onclose = () => {
+            eventSource.onerror = () => {
                 setConnectionMode("polling");
-                reconnectTimer = setTimeout(connectWs, 3000);
             };
-        };
-        connectWs();
+        } catch (e) {
+            setConnectionMode("polling");
+        }
 
         return () => {
             clearInterval(pollTimer);
             clearInterval(statsTimer);
-            if (reconnectTimer) clearTimeout(reconnectTimer);
-            if (socket) socket.close();
+            if (eventSource) eventSource.close();
         };
     }, []);
 
@@ -406,8 +400,8 @@ export default function Devices() {
                                     <span className="text-sm text-white/90 font-medium">{detectedCount} Detected</span>
                                 </div>
                                 <div className="flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20">
-                                    <div className={`w-2 h-2 rounded-full ${connectionMode === "websocket" ? "bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.9)]" : "bg-white/70"}`}></div>
-                                    <span className="text-sm text-white/90 font-medium">{connectionMode === "websocket" ? "Live" : "Polling"}</span>
+                                    <div className={`w-2 h-2 rounded-full ${connectionMode === "live_stream" || connectionMode === "websocket" ? "bg-cyan-300 shadow-[0_0_6px_rgba(103,232,249,0.9)] animate-pulse" : "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"}`}></div>
+                                    <span className="text-sm text-white/90 font-medium">{connectionMode === "live_stream" || connectionMode === "websocket" ? "Live Stream" : "Live Scan"}</span>
                                 </div>
                                 <div className="flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 border border-white/20">
                                     <div className="w-2 h-2 rounded-full bg-violet-300 shadow-[0_0_6px_rgba(216,180,254,0.9)]"></div>
