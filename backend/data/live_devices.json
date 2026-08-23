@@ -18,7 +18,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:03Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_1407083582c9",
@@ -39,7 +39,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_00b00bf34175",
@@ -60,7 +60,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_4e4b40e2e8d0",
@@ -81,13 +81,13 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_a2fe23b938bd",
     "device_id": "device_a2fe23b938bd",
     "name": "Friend's Windows Laptop",
-    "hostname": "DESKTOP-057GQQH",
+    "hostname": "DESKTOP-057GQQH.lan",
     "ip": "192.168.31.158",
     "mac": "A2:FE:23:B9:38:BD",
     "type": "laptop",
@@ -102,7 +102,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_50bbb579e718",
@@ -123,7 +123,7 @@
     "network_usage": 3200,
     "connections": 12,
     "cpu": 85,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   },
   {
     "_id": "dev_device_564bd3927a39",
@@ -144,6 +144,6 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:20:08Z"
+    "last_seen": "2026-08-23T07:26:31Z"
   }
 ]

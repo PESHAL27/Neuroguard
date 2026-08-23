@@ -12,15 +12,15 @@ export async function GET(req) {
                     const payload = `data: ${JSON.stringify(devices)}\n\n`;
                     controller.enqueue(new TextEncoder().encode(payload));
                 } catch (err) {
-                    // Stream closed or error
+                    // Stream closed
                 }
             };
 
-            // Send immediate snapshot
+            // Immediate initial snapshot
             sendUpdate();
 
-            // Push updates every 1000ms
-            intervalId = setInterval(sendUpdate, 1000);
+            // Push updates every 250ms for instant real-time response
+            intervalId = setInterval(sendUpdate, 250);
         },
         cancel() {
             if (intervalId) clearInterval(intervalId);
