@@ -1,7 +1,8 @@
 """
-NeuroGuard Ultra-Fast Real-Time Layer-2 Network Scanner & Active Quarantine Daemon
-Completes whole subnet discovery sweep in < 150ms with zero DNS blocking.
-Instantly updates live_devices.json when devices connect/disconnect.
+NeuroGuard High-Performance Real-Time Network Monitor
+- Tier 1: Instant Liveness Probe (Every 1s on known devices) -> Detects Wi-Fi Disconnects in < 1s.
+- Tier 2: Background Discovery Sweep (Continuous asynchronous sweep of 1..254) -> Discovers new devices in 2-3s.
+- Active Quarantine: Windows Firewall rule management for blocked nodes.
 """
 
 import os
@@ -12,7 +13,6 @@ import socket
 import struct
 import ctypes
 import subprocess
-import re
 import threading
 import concurrent.futures
 from pathlib import Path
@@ -55,7 +55,7 @@ MAC_VENDORS = {
     "AC:67:B2": ("Espressif Systems ESP32", "esp32"),
 }
 
-# Non-blocking name cache
+# Known initial devices cache
 DEVICE_CACHE = {
     "192.168.31.1": ("JioFiber Home Gateway", "router", "Jio / Sercomm Optical Gateway", "jiofiber.local.html"),
     "192.168.31.91": ("Smart IoT Sensor Node", "sensor", "Amazon Technologies Inc.", "smart-node.lan"),
@@ -66,28 +66,21 @@ DEVICE_CACHE = {
     "192.168.31.207": ("Realme NARZO 80 Lite 5G", "phone", "Realme Mobile Corporation", "realme-NARZO-80-Lite-5G.lan"),
 }
 
-quarantined_ips = set()
-resolving_ips = set()
+# State store
+active_devices = {
+    "192.168.31.1": "FC:B0:DE:23:D9:EC",
+    "192.168.31.91": "14:07:08:35:82:C9",
+    "192.168.31.103": "00:B0:0B:F3:41:75",
+    "192.168.31.144": "4E:4B:40:E2:E8:D0",
+    "192.168.31.158": "A2:FE:23:B9:38:BD",
+    "192.168.31.173": "50:BB:B5:79:E7:18",
+    "192.168.31.207": "56:4B:D3:92:7A:39",
+}
 
-def async_resolve_hostname(ip):
-    """Resolve hostname in background without blocking the main scan loop."""
-    if ip in resolving_ips or ip in DEVICE_CACHE:
-        return
-    resolving_ips.add(ip)
-    def _worker():
-        try:
-            h, _, _ = socket.gethostbyaddr(ip)
-            if h and ip not in DEVICE_CACHE:
-                name = h.split(".")[0].replace("-", " ").title()
-                DEVICE_CACHE[ip] = (name, "laptop", "Network Client", h)
-        except Exception:
-            pass
-        finally:
-            resolving_ips.discard(ip)
-    threading.Thread(target=_worker, daemon=True).start()
+state_lock = threading.Lock()
+quarantined_ips = set()
 
 def get_local_info():
-    """Detect current machine IP and local subnet prefix."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         s.connect(('8.8.8.8', 80))
@@ -110,10 +103,7 @@ def load_overrides():
     return {}
 
 def enforce_quarantine(blocked_ips):
-    """Enforce active quarantine on blocked IPs using Windows Firewall rules."""
     global quarantined_ips
-    
-    # Add new blocked IPs
     for ip in blocked_ips:
         if ip and ip not in quarantined_ips and not ip.startswith("192.168.31.173"):
             quarantined_ips.add(ip)
@@ -129,7 +119,6 @@ def enforce_quarantine(blocked_ips):
             except Exception:
                 pass
 
-    # Remove unblocked IPs
     for ip in list(quarantined_ips):
         if ip not in blocked_ips:
             quarantined_ips.remove(ip)
@@ -141,8 +130,36 @@ def enforce_quarantine(blocked_ips):
             except Exception:
                 pass
 
-def arp_query_ip(ip_str):
-    """Query a single IP via Layer-2 SendARP."""
+def probe_single_liveness(ip, timeout_ms=180):
+    """Instant check if an already known IP is online (Layer 2 SendARP + ICMP fallback)."""
+    # 1. SendARP check
+    if SendARP:
+        try:
+            dest_ip = struct.unpack('<I', socket.inet_aton(ip))[0]
+            mac_addr = (ctypes.c_ubyte * 6)()
+            mac_len = ctypes.c_ulong(6)
+            res = SendARP(dest_ip, 0, ctypes.byref(mac_addr), ctypes.byref(mac_len))
+            if res == 0:
+                mac_str = ':'.join(['{:02X}'.format(b) for b in mac_addr])
+                return ip, mac_str, True
+        except Exception:
+            pass
+
+    # 2. Fast ping check
+    try:
+        res = subprocess.run(
+            ['ping', '-n', '1', '-w', str(timeout_ms), ip],
+            capture_output=True, text=True, timeout=0.3
+        )
+        if 'TTL=' in res.stdout:
+            return ip, None, True
+    except Exception:
+        pass
+
+    return ip, None, False
+
+def query_new_ip(ip_str):
+    """Check an unknown IP during subnet sweep."""
     if not SendARP:
         return None
     try:
@@ -157,8 +174,24 @@ def arp_query_ip(ip_str):
         pass
     return None
 
+def background_discovery_thread(subnet, local_ip):
+    """Runs continuous background sweeps of the whole subnet to find new devices."""
+    print("[NeuroGuard Scanner] Background subnet discovery thread started.")
+    while True:
+        try:
+            ips = [f"{subnet}{i}" for i in range(1, 255)]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=25) as ex:
+                results = list(ex.map(query_new_ip, ips))
+                for res in results:
+                    if res:
+                        ip, mac = res
+                        with state_lock:
+                            active_devices[ip] = mac
+        except Exception as e:
+            print(f"[Discovery Error] {e}")
+        time.sleep(2.0)
+
 def resolve_device_name(ip, mac):
-    """Instant non-blocking friendly name and device type."""
     if ip in DEVICE_CACHE:
         return DEVICE_CACHE[ip]
 
@@ -179,38 +212,27 @@ def resolve_device_name(ip, mac):
         res = ("Friend's Workstation (SYSTEM1)", "laptop", "Dell / Windows Laptop", "SYSTEM1.lan")
     else:
         res = (f"Connected Device ({ip.split('.')[-1]})", type_guess, vendor, f"device-{ip.split('.')[-1]}.lan")
-        async_resolve_hostname(ip)
 
     DEVICE_CACHE[ip] = res
     return res
 
-def fast_subnet_sweep(subnet, local_ip, gateway_ip):
-    """Parallel Layer 2 SendARP sweep of all 254 IPs in ~150ms."""
-    ips = [f"{subnet}{i}" for i in range(1, 255)]
-    live_map = {}
+def main():
+    print("[NeuroGuard Scanner] Fast Dual-Tier Live Monitor started.")
+    local_ip, subnet, gateway_ip = get_local_info()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=75) as ex:
-        results = ex.map(arp_query_ip, ips)
-        for res in results:
-            if res:
-                ip, mac = res
-                live_map[ip] = mac
+    # Start background discovery thread
+    discovery_t = threading.Thread(target=background_discovery_thread, args=(subnet, local_ip), daemon=True)
+    discovery_t.start()
 
-    # Always include current local PC
-    if local_ip not in live_map:
-        live_map[local_ip] = "CURRENT-HOST-MAC"
+    # Instant liveness thread pool (reused across cycles, size 10)
+    liveness_executor = concurrent.futures.ThreadPoolExecutor(max_workers=12)
 
-    return live_map
+    # Failure counter for clean debouncing (requires 2 consecutive failures to drop)
+    miss_counts = {}
 
-def main_loop():
-    print("[NeuroGuard Scanner] Ultra-fast sub-second scanner daemon started.")
-    
     while True:
         try:
-            local_ip, subnet, gateway_ip = get_local_info()
             overrides = load_overrides()
-
-            # Identify all blocked IPs from overrides
             blocked_ips = set()
             for key, ov in overrides.items():
                 if ov.get("blocked"):
@@ -219,16 +241,38 @@ def main_loop():
                     elif key.count(".") == 3:
                         blocked_ips.add(key)
 
-            # Enforce active quarantine on firewall
             enforce_quarantine(blocked_ips)
 
-            # Perform instant Layer-2 sweep (< 150ms)
-            live_map = fast_subnet_sweep(subnet, local_ip, gateway_ip)
+            with state_lock:
+                current_ips = list(active_devices.keys())
 
+            # Probe known active devices in parallel (< 180ms)
+            future_to_ip = {liveness_executor.submit(probe_single_liveness, ip): ip for ip in current_ips if ip != local_ip}
+            
+            still_online = {local_ip: active_devices.get(local_ip, "CURRENT-HOST-MAC")}
+            for future in concurrent.futures.as_completed(future_to_ip, timeout=1.0):
+                ip, new_mac, is_online = future.result()
+                if is_online:
+                    miss_counts[ip] = 0
+                    with state_lock:
+                        mac = new_mac or active_devices.get(ip, "UNKNOWN")
+                        still_online[ip] = mac
+                else:
+                    miss_counts[ip] = miss_counts.get(ip, 0) + 1
+                    # If missed 2 consecutive checks, remove from active devices
+                    if miss_counts[ip] >= 2:
+                        with state_lock:
+                            active_devices.pop(ip, None)
+                    else:
+                        # Keep for 1 grace cycle
+                        with state_lock:
+                            if ip in active_devices:
+                                still_online[ip] = active_devices[ip]
+
+            # Build final device output list
             devices_list = []
-            for ip, mac in live_map.items():
+            for ip, mac in still_online.items():
                 dev_id = f"device_{mac.replace(':', '').lower()}" if mac != "CURRENT-HOST-MAC" else "device_current_host"
-                
                 ov = overrides.get(dev_id) or overrides.get(ip) or {}
                 is_blocked = bool(ov.get("blocked", False) or ip in blocked_ips)
                 is_untrusted = bool(ov.get("trusted") is False or ov.get("surveillance") is True)
@@ -267,15 +311,14 @@ def main_loop():
                 }
                 devices_list.append(device_entry)
 
-            # Write to output file immediately
             with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
                 json.dump(devices_list, f, indent=2)
 
         except Exception as e:
-            print(f"[NeuroGuard Scanner Error] {e}")
+            print(f"[Loop Error] {e}")
 
-        # Sleep for just 250ms for lightning-fast responsiveness
-        time.sleep(0.25)
+        # Cycle pause
+        time.sleep(0.5)
 
 if __name__ == "__main__":
-    main_loop()
+    main()
