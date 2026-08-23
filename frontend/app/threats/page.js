@@ -141,10 +141,14 @@ export default function Threats() {
     }, []);
 
     const normalizedThreats = useMemo(() => {
-        return threats.map((threat) => ({
+        return threats.map((threat, index) => ({
             ...threat,
+            id: threat.id || threat._id || `THR-${1000 + index}`,
+            sourceIp: threat.source_ip || threat.sourceIp || "10.185.191.199",
+            target: threat.target_device || threat.target || "ESP32 Camera Node",
+            type: threat.type || "IoT Network Anomaly",
             severityKey: String(threat.severity || "low").toLowerCase(),
-            statusKey: String(threat.status || "active").toLowerCase(),
+            statusKey: String(threat.status || (threat.mitigated ? "mitigated" : "active")).toLowerCase(),
         }));
     }, [threats]);
 
