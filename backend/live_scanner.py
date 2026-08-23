@@ -1,9 +1,8 @@
 """
-NeuroGuard Ultra-Fast Real-Time Dual-Tier Live Monitor
-- Cycle time: ~300ms
-- Zero Blocking, Zero Timeouts
-- Disconnect detection: ~0.5s - 1.0s
-- Reconnect detection: ~1.0s - 2.0s
+NeuroGuard Ultra-Stable Real-Time Subnet Monitor
+- Ignores multicast/broadcast artifacts (224.x, 239.x, 255.x)
+- Strict subnet isolation (192.168.31.1 - 192.168.31.254)
+- Stable device counts: only changes when physical devices connect or disconnect.
 """
 
 import os
@@ -11,6 +10,8 @@ import sys
 import json
 import time
 import socket
+import struct
+import ctypes
 import subprocess
 import re
 import threading
@@ -29,6 +30,12 @@ DATA_DIR = Path("C:/Users/pecul/Desktop/Peshal/college/Hackathon/Neuroguard/back
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = DATA_DIR / "live_devices.json"
 OVERRIDES_FILE = DATA_DIR / "device_overrides.json"
+
+# Windows SendARP API
+try:
+    SendARP = ctypes.windll.iphlpapi.SendARP
+except Exception:
+    SendARP = None
 
 MAC_VENDORS = {
     "FC:B0:DE": ("Jio / Sercomm Optical Gateway", "router"),
@@ -65,6 +72,7 @@ known_candidates = set([
 
 quarantined_ips = set()
 lock = threading.Lock()
+miss_count = {}
 
 def get_local_info():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -116,7 +124,7 @@ def enforce_quarantine(blocked_ips):
             except Exception:
                 pass
 
-def get_arp_table():
+def get_arp_table(subnet):
     try:
         out = subprocess.run(["arp", "-a"], capture_output=True, text=True, timeout=0.25).stdout
         entries = {}
@@ -124,7 +132,8 @@ def get_arp_table():
             m = re.search(r'(\d+\.\d+\.\d+\.\d+)\s+([0-9a-fA-F\-]{17})', line)
             if m:
                 ip, mac = m.groups()
-                if not ip.startswith('224.') and not ip.startswith('239.') and not ip.endswith('.255'):
+                # STRICT VALIDATION: only valid subnet IPs (e.g. 192.168.31.1 - 254), ignore 224.x, 255.x
+                if ip.startswith(subnet) and not ip.endswith('.255'):
                     entries[ip] = mac.replace('-', ':').upper()
         return entries
     except Exception:
@@ -135,7 +144,7 @@ def fast_ping(ip):
         t0 = time.time()
         res = subprocess.run(
             ["ping", "-n", "1", "-w", "150", ip],
-            capture_output=True, text=True, timeout=0.3
+            capture_output=True, text=True, timeout=0.25
         )
         if "TTL=" in res.stdout:
             lat = int((time.time() - t0) * 1000)
@@ -145,19 +154,19 @@ def fast_ping(ip):
     return ip, False, None
 
 def background_discovery(subnet):
-    """Background sweep across 1..254 to find new devices without slowing down liveness."""
+    """Periodic background subnet discovery sweep (every 3.5s)."""
     while True:
         try:
             ips = [f"{subnet}{i}" for i in range(1, 255)]
-            with concurrent.futures.ThreadPoolExecutor(max_workers=20) as ex:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=25) as ex:
                 results = list(ex.map(fast_ping, ips))
                 for ip, is_up, _ in results:
-                    if is_up:
+                    if is_up and ip.startswith(subnet):
                         with lock:
                             known_candidates.add(ip)
         except Exception:
             pass
-        time.sleep(3.0)
+        time.sleep(3.5)
 
 def resolve_device_name(ip, mac):
     if ip in DEVICE_CACHE:
@@ -185,7 +194,7 @@ def resolve_device_name(ip, mac):
     return res
 
 def main():
-    print("[NeuroGuard Scanner] Ultra-Fast Live Monitor Engine Started.")
+    print("[NeuroGuard Scanner] Ultra-Stable Subnet Monitor Started.")
     local_ip, subnet, gateway_ip = get_local_info()
 
     # Start background discovery thread
@@ -207,33 +216,45 @@ def main():
 
             enforce_quarantine(blocked_ips)
 
-            # Read fresh ARP table
-            arp_table = get_arp_table()
+            # Read clean ARP table (only valid subnet IPs)
+            arp_table = get_arp_table(subnet)
             
             with lock:
                 for ip in arp_table:
-                    known_candidates.add(ip)
-                candidates = list(known_candidates)
+                    if ip.startswith(subnet):
+                        known_candidates.add(ip)
+                # Strict filter: only valid subnet IPs
+                valid_candidates = [ip for ip in known_candidates if ip.startswith(subnet)]
 
-            # Ping candidate devices in parallel (< 200ms)
-            ping_results = list(executor.map(fast_ping, candidates))
+            # Ping candidate devices in parallel
+            ping_results = list(executor.map(fast_ping, valid_candidates))
             
             online_ips = {}
             for ip, is_up, latency in ping_results:
                 if is_up:
+                    miss_count[ip] = 0
                     mac = arp_table.get(ip, "50:BB:B5:79:E7:18" if ip == local_ip else "DYNAMIC-MAC")
                     online_ips[ip] = (mac, latency or 45)
                 elif ip in arp_table and ip != local_ip:
-                    # Present in ARP cache
+                    # Present in active ARP cache
+                    miss_count[ip] = 0
                     online_ips[ip] = (arp_table[ip], 50)
+                else:
+                    miss_count[ip] = miss_count.get(ip, 0) + 1
+                    # If missed 2 consecutive cycles, device is officially disconnected
+                    if miss_count[ip] < 2 and ip in DEVICE_CACHE:
+                        # Grace cycle to prevent single-packet drop blips
+                        mac = arp_table.get(ip, "DYNAMIC-MAC")
+                        online_ips[ip] = (mac, 60)
 
             # Always include local machine
             if local_ip not in online_ips:
                 online_ips[local_ip] = ("50:BB:B5:79:E7:18", 15)
 
             devices_list = []
-            for ip, (mac, latency) in online_ips.items():
-                dev_id = f"device_{mac.replace(':', '').lower()}" if mac not in ["DYNAMIC-MAC", "50:BB:B5:79:E7:18"] else f"dev_{ip.replace('.', '_')}"
+            for ip in sorted(online_ips.keys(), key=lambda x: int(x.split('.')[-1])):
+                mac, latency = online_ips[ip]
+                dev_id = f"device_{ip.replace('.', '_')}"
                 
                 ov = overrides.get(dev_id) or overrides.get(ip) or {}
                 is_blocked = bool(ov.get("blocked", False) or ip in blocked_ips)
@@ -278,9 +299,9 @@ def main():
                 json.dump(devices_list, f, indent=2)
 
         except Exception as e:
-            print(f"[Loop Exception] {e}")
+            print(f"[Scanner Error] {e}")
 
-        time.sleep(0.3)
+        time.sleep(0.5)
 
 if __name__ == "__main__":
     main()
