@@ -10,25 +10,14 @@ export async function POST(req) {
             connected: true,
             monitor: true,
             status: "connected",
+            quarantined_at: null,
+            blocked_reason: null,
         });
 
-        if (updated) {
-            return NextResponse.json({
-                status: "success",
-                message: `Device ${deviceId} unblocked`,
-                device: updated
-            });
-        }
-
-        const existing = findDevice(deviceId);
         return NextResponse.json({
             status: "success",
-            device: {
-                ...(existing || body),
-                blocked: false,
-                connected: true,
-                status: "connected",
-            }
+            message: `Device unblocked and restored to active network`,
+            device: updated
         });
     } catch (err) {
         return NextResponse.json({ status: "error", message: err.message }, { status: 500 });

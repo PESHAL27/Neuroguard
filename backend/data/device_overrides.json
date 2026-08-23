@@ -1,0 +1,19 @@
+{
+  "device_564bd3927a39": {
+    "trusted": true,
+    "surveillance": false,
+    "status": "connected",
+    "surveillance_level": "High",
+    "surveillance_started": "2026-08-23T07:00:43.315Z",
+    "device_id": "device_564bd3927a39",
+    "ip": "192.168.31.207",
+    "name": "Realme NARZO 80 Lite 5G",
+    "mac": "56:4B:D3:92:7A:39",
+    "last_seen": "2026-08-23T07:02:40.699Z",
+    "blocked": false,
+    "connected": true,
+    "monitor": true,
+    "quarantined_at": null,
+    "blocked_reason": null
+  }
+}

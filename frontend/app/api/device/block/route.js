@@ -10,25 +10,14 @@ export async function POST(req) {
             connected: false,
             monitor: false,
             status: "blocked",
+            quarantined_at: new Date().toISOString(),
+            blocked_reason: body.reason || "Manual Access Revocation / Quarantine",
         });
 
-        if (updated) {
-            return NextResponse.json({
-                status: "success",
-                message: `Device ${deviceId} blocked`,
-                device: updated
-            });
-        }
-
-        const existing = findDevice(deviceId);
         return NextResponse.json({
             status: "success",
-            device: {
-                ...(existing || body),
-                blocked: true,
-                connected: false,
-                status: "blocked",
-            }
+            message: `Device quarantined and removed from active network`,
+            device: updated
         });
     } catch (err) {
         return NextResponse.json({ status: "error", message: err.message }, { status: 500 });

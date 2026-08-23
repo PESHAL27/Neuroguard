@@ -1,32 +1,49 @@
 import fs from "fs";
 import path from "path";
 
-// Override map for manual user actions (e.g. manual block, untrust, rename)
-if (!global.__neuroguardOverrides) {
-    global.__neuroguardOverrides = new Map();
+function getPaths() {
+    const dataDir = path.join("C:\\Users\\pecul\\Desktop\\Peshal\\college\\Hackathon\\Neuroguard", "backend", "data");
+    try {
+        if (!fs.existsSync(dataDir)) {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+    } catch (e) {}
+
+    return {
+        liveScan: path.join(dataDir, "live_devices.json"),
+        overrides: path.join(dataDir, "device_overrides.json"),
+    };
 }
 
-function getLiveScanFilePath() {
-    // Look for backend/data/live_devices.json in current workspace
-    const possiblePaths = [
-        path.join(process.cwd(), "..", "backend", "data", "live_devices.json"),
-        path.join(process.cwd(), "backend", "data", "live_devices.json"),
-        "C:\\Users\\pecul\\Desktop\\Peshal\\college\\Hackathon\\Neuroguard\\backend\\data\\live_devices.json"
-    ];
-    for (const p of possiblePaths) {
-        if (fs.existsSync(p)) return p;
+function loadOverrides() {
+    const { overrides } = getPaths();
+    if (fs.existsSync(overrides)) {
+        try {
+            return JSON.parse(fs.readFileSync(overrides, "utf8"));
+        } catch (e) {
+            console.error("Error reading device_overrides.json:", e.message);
+        }
     }
-    return possiblePaths[0];
+    return {};
+}
+
+function saveOverrides(data) {
+    const { overrides } = getPaths();
+    try {
+        fs.writeFileSync(overrides, JSON.stringify(data, null, 2), "utf8");
+    } catch (e) {
+        console.error("Error saving device_overrides.json:", e.message);
+    }
 }
 
 export function getAllDevices() {
-    const liveFilePath = getLiveScanFilePath();
+    const { liveScan } = getPaths();
+    const overrides = loadOverrides();
     let devices = [];
 
-    if (fs.existsSync(liveFilePath)) {
+    if (fs.existsSync(liveScan)) {
         try {
-            const fileContent = fs.readFileSync(liveFilePath, "utf8");
-            const parsed = JSON.parse(fileContent);
+            const parsed = JSON.parse(fs.readFileSync(liveScan, "utf8"));
             if (Array.isArray(parsed)) {
                 devices = parsed;
             }
@@ -35,41 +52,76 @@ export function getAllDevices() {
         }
     }
 
-    // Apply any user overrides (e.g. renamed, blocked, untrusted)
+    // Apply operator overrides
     const processed = devices.map(d => {
-        const override = global.__neuroguardOverrides.get(d.device_id) || global.__neuroguardOverrides.get(d._id);
+        const key = d.device_id || d._id || d.mac || d.ip;
+        const override = overrides[key] || overrides[d.device_id] || overrides[d.ip];
         if (override) {
-            return { ...d, ...override };
+            const merged = { ...d, ...override };
+            // If device is blocked, ensure connected is false
+            if (merged.blocked) {
+                merged.connected = false;
+                merged.status = "blocked";
+            } else if (merged.trusted === false) {
+                merged.surveillance = true;
+                merged.status = "surveillance";
+            }
+            return merged;
         }
         return d;
     });
 
-    // Return only active / connected devices (disconnected ones are omitted from the live list)
-    return processed.filter(d => d.connected !== false);
+    // Also include any blocked devices that may have been dropped from scan
+    const processedKeys = new Set(processed.map(d => d.device_id || d.ip));
+    for (const [key, ov] of Object.entries(overrides)) {
+        if (ov.blocked && !processedKeys.has(key) && !processedKeys.has(ov.device_id) && !processedKeys.has(ov.ip)) {
+            processed.push({
+                _id: ov.device_id || `dev_${key}`,
+                device_id: ov.device_id || key,
+                name: ov.name || "Blocked Device",
+                ip: ov.ip || "N/A",
+                mac: ov.mac || "N/A",
+                type: ov.type || "unknown",
+                status: "blocked",
+                connected: false,
+                blocked: true,
+                trusted: false,
+                surveillance: false,
+                threat_count: 1,
+                last_seen: ov.last_seen || new Date().toISOString(),
+            });
+        }
+    }
+
+    return processed;
 }
 
 export function findDevice(deviceId) {
     const all = getAllDevices();
-    return all.find(d => d.device_id === deviceId || d._id === deviceId);
+    return all.find(d => d.device_id === deviceId || d._id === deviceId || d.ip === deviceId);
 }
 
 export function updateDevice(deviceId, updates) {
-    const existingOverride = global.__neuroguardOverrides.get(deviceId) || {};
-    const updatedOverride = {
-        ...existingOverride,
+    const overrides = loadOverrides();
+    const current = findDevice(deviceId) || { device_id: deviceId };
+    const key = current.device_id || deviceId;
+
+    const existing = overrides[key] || {};
+    const updated = {
+        ...existing,
         ...updates,
+        device_id: key,
+        ip: current.ip || existing.ip,
+        name: updates.name || current.name || existing.name,
+        mac: current.mac || existing.mac,
         last_seen: new Date().toISOString()
     };
-    global.__neuroguardOverrides.set(deviceId, updatedOverride);
 
-    // Also update if under alternate key
-    const current = findDevice(deviceId);
-    if (current && current.device_id !== deviceId) {
-        global.__neuroguardOverrides.set(current.device_id, updatedOverride);
-    }
+    overrides[key] = updated;
+    saveOverrides(overrides);
 
     return {
-        ...(current || { device_id: deviceId }),
-        ...updatedOverride
+        ...current,
+        ...updated
     };
 }

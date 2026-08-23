@@ -5,23 +5,16 @@ export async function POST(req) {
     try {
         const body = await req.json().catch(() => ({}));
         const deviceId = body.device_id || body.id;
-        const updated = updateDevice(deviceId, { trusted: true });
+        const updated = updateDevice(deviceId, {
+            trusted: true,
+            surveillance: false,
+            status: "connected",
+        });
 
-        if (updated) {
-            return NextResponse.json({
-                status: "success",
-                message: `Device ${deviceId} trusted`,
-                device: updated
-            });
-        }
-
-        const existing = findDevice(deviceId);
         return NextResponse.json({
             status: "success",
-            device: {
-                ...(existing || body),
-                trusted: true,
-            }
+            message: `Device cleared from surveillance and marked as Trusted`,
+            device: updated
         });
     } catch (err) {
         return NextResponse.json({ status: "error", message: err.message }, { status: 500 });

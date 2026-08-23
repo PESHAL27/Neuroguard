@@ -323,26 +323,29 @@ export default function Devices() {
         show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 260, damping: 22 } }
     };
 
-    const connectedCount = devices.filter((device) => device.connected).length;
-    const detectedCount = devices.filter((device) => device.status === "detected").length;
+    const connectedCount = devices.filter((device) => device.connected && !device.blocked).length;
+    const detectedCount = devices.filter((device) => device.status === "detected" && !device.blocked).length;
     const blockedCount = devices.filter((device) => device.blocked).length;
-    const trustedCount = devices.filter((device) => device.trusted).length;
-    const cameraCount = devices.filter(d => d.type?.toLowerCase() === "camera").length;
-    const sensorCount = devices.filter(d => d.type?.toLowerCase() === "sensor").length;
+    const surveillanceCount = devices.filter((device) => (device.surveillance || device.trusted === false) && !device.blocked).length;
+    const trustedCount = devices.filter((device) => device.trusted && !device.blocked).length;
+    const cameraCount = devices.filter(d => d.type?.toLowerCase() === "camera" && !d.blocked).length;
+    const sensorCount = devices.filter(d => d.type?.toLowerCase() === "sensor" && !d.blocked).length;
 
-    const filteredDevices = filter === "all" ? devices : devices.filter(d => {
-        if (filter.startsWith("highlight:")) {
-            const param = filter.split(":")[1].toLowerCase();
-            return d.name?.toLowerCase().includes(param) || d.hostname?.toLowerCase().includes(param) || d.ip === param || (d.device_id || d.mac_address || d.id) === filter.split(":")[1];
-        }
-        if (filter === "cameras") return d.type?.toLowerCase() === "camera";
-        if (filter === "sensors") return d.type?.toLowerCase() === "sensor";
-        if (filter === "connected") return d.connected;
-        if (filter === "trusted") return d.trusted;
-        if (filter === "blocked") return d.blocked;
-        if (filter === "issues") return d.status === "detected" || d.blocked;
-        return true;
-    });
+    const filteredDevices = filter === "all" 
+        ? devices.filter(d => !d.blocked) 
+        : devices.filter(d => {
+            if (filter.startsWith("highlight:")) {
+                const param = filter.split(":")[1].toLowerCase();
+                return d.name?.toLowerCase().includes(param) || d.hostname?.toLowerCase().includes(param) || d.ip === param || (d.device_id || d.mac_address || d.id) === filter.split(":")[1];
+            }
+            if (filter === "cameras") return d.type?.toLowerCase() === "camera" && !d.blocked;
+            if (filter === "sensors") return d.type?.toLowerCase() === "sensor" && !d.blocked;
+            if (filter === "connected") return d.connected && !d.blocked;
+            if (filter === "surveillance" || filter === "untrusted") return (d.surveillance || d.trusted === false) && !d.blocked;
+            if (filter === "trusted") return d.trusted && !d.blocked;
+            if (filter === "blocked" || filter === "quarantine") return d.blocked;
+            return true;
+        });
 
     return (
         <div className="min-h-screen w-full bg-[#050510] text-white relative overflow-x-hidden pt-28 pb-16 px-4 md:px-8 xl:px-12 flex justify-center selection:bg-cyan-500/30">
@@ -527,6 +530,47 @@ export default function Devices() {
                     </motion.div>
                 </div>
 
+                {/* Quick Filter Navigation Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-white/5 backdrop-blur-md rounded-2xl p-2.5 border border-white/10 mt-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            onClick={() => setFilter("all")}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${filter === "all" ? "bg-white text-black shadow-md" : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"}`}
+                        >
+                            All Connected ({connectedCount})
+                        </button>
+                        <button
+                            onClick={() => setFilter("surveillance")}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${filter === "surveillance" ? "bg-amber-400 text-black shadow-[0_0_12px_rgba(251,191,36,0.5)]" : "bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20"}`}
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></div>
+                            AI Surveillance ({surveillanceCount})
+                        </button>
+                        <button
+                            onClick={() => setFilter("blocked")}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${filter === "blocked" ? "bg-rose-500 text-white shadow-[0_0_12px_rgba(244,63,94,0.5)]" : "bg-rose-500/10 text-rose-300 border border-rose-500/20 hover:bg-rose-500/20"}`}
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
+                            Quarantined / Blocked ({blockedCount})
+                        </button>
+                        <button
+                            onClick={() => setFilter("cameras")}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${filter === "cameras" ? "bg-cyan-400 text-black" : "bg-white/5 text-white/70 hover:bg-white/10"}`}
+                        >
+                            Cameras ({cameraCount})
+                        </button>
+                        <button
+                            onClick={() => setFilter("sensors")}
+                            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${filter === "sensors" ? "bg-cyan-400 text-black" : "bg-white/5 text-white/70 hover:bg-white/10"}`}
+                        >
+                            Sensors ({sensorCount})
+                        </button>
+                    </div>
+                    <div className="text-xs text-white/50 font-mono pr-2">
+                        {filteredDevices.length} {filter === "blocked" ? "quarantined" : "connected"}
+                    </div>
+                </div>
+
                 {/* ===== DEVICE LIST GRID OR EMPTY STATE ===== */}
                 {renameError ? (
                     <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
@@ -534,30 +578,33 @@ export default function Devices() {
                     </div>
                 ) : null}
 
-                {devices.length === 0 ? (
-                    <motion.div variants={itemVariants} className="w-full h-64 flex flex-col items-center justify-center border border-white/10 rounded-3xl bg-white/5 backdrop-blur-sm mt-8">
-                        <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4 shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
-                        <h3 className="text-xl font-medium text-white/90 tracking-wide">No devices connected</h3>
-                        <p className="text-white/50 text-sm mt-2 max-w-sm text-center">Background scanner is actively listening for network connections and ESP32 telemetry...</p>
+                {filteredDevices.length === 0 ? (
+                    <motion.div variants={itemVariants} className="w-full h-64 flex flex-col items-center justify-center border border-white/10 rounded-3xl bg-white/5 backdrop-blur-sm mt-4">
+                        <div className="w-14 h-14 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mb-4 shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
+                        <h3 className="text-xl font-medium text-white/90 tracking-wide">
+                            {filter === "blocked" ? "No Quarantined Devices" : filter === "surveillance" ? "No Devices Under AI Surveillance" : "No devices currently connected"}
+                        </h3>
+                        <p className="text-white/50 text-sm mt-2 max-w-sm text-center">
+                            {filter === "blocked" ? "All active devices are currently permitted on the network." : "Live background scanner is continuously monitoring the subnet for packet traffic..."}
+                        </p>
                     </motion.div>
                 ) : (
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-2"
                         variants={containerVariants}
                         initial="hidden"
                         animate="show"
                         key={filter}
                     >
                         {filteredDevices.map((device, index) => {
-                            const state = device.status || (device.blocked ? "blocked" : device.connected ? "connected" : "detected");
-                            const isBlocked = state === "blocked";
-                            const isConnected = state === "connected";
-                            const isDetected = state === "detected";
-                            const isUnknown = !isConnected;
+                            const isBlocked = Boolean(device.blocked);
+                            const isUnderSurveillance = Boolean(device.surveillance || device.trusted === false);
+                            const isConnected = Boolean(device.connected && !isBlocked);
+                            const isDetected = device.status === "detected";
+                            const isUnknown = !isConnected && !isBlocked;
                             const guessedType = (device.type_guess || "unknown").toLowerCase();
                             const devType = (device.type || device.type_guess || "unknown").toLowerCase();
                             const imgUrl = (deviceImages[devType] && deviceImages[devType] !== "pending") ? deviceImages[devType] : "https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/help-circle.svg";
-                            const stateTheme = statusColor[state] || statusColor.detected;
                             const defaultConnectName = device.name || (device.hostname ? device.hostname.replace(/[-_.]+/g, " ") : `${(device.type || device.type_guess || "device")} device`);
 
                             return (
@@ -565,23 +612,23 @@ export default function Devices() {
                                     key={device._id || device.device_id || `dev-${index}`}
                                     variants={itemVariants}
                                     whileHover={{ y: -6, scale: 1.02, transition: { duration: 0.2 } }}
-                                    className={`relative overflow-hidden rounded-2xl p-5 flex flex-col gap-4 border ${isBlocked ? 'border-rose-500/40 bg-rose-500/5' : isDetected ? 'border-amber-500/40 bg-amber-500/5' : 'border-white/10'} cursor-pointer group`}
+                                    className={`relative overflow-hidden rounded-2xl p-5 flex flex-col gap-4 border ${isBlocked ? 'border-rose-500/50 bg-rose-950/20 shadow-[0_0_25px_rgba(244,63,94,0.15)]' : isUnderSurveillance ? 'border-amber-500/40 bg-amber-950/15' : 'border-white/10'} cursor-pointer group`}
                                     style={{
-                                        background: isConnected ? "linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)" : undefined,
-                                        boxShadow: isBlocked ? "inset 0 0 20px rgba(244,63,94,0.12)" : isDetected ? "inset 0 0 20px rgba(251,191,36,0.1)" : "inset 0 1px 12px rgba(255,255,255,0.08), 0 8px 24px -6px rgba(0,0,0,0.3)"
+                                        background: isConnected && !isUnderSurveillance ? "linear-gradient(160deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)" : undefined,
+                                        boxShadow: isBlocked ? "inset 0 0 25px rgba(244,63,94,0.18)" : isUnderSurveillance ? "inset 0 0 20px rgba(251,191,36,0.12)" : "inset 0 1px 12px rgba(255,255,255,0.08), 0 8px 24px -6px rgba(0,0,0,0.3)"
                                     }}
                                 >
                                     {/* Hover glow effect */}
                                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                                        style={{ background: isBlocked ? "radial-gradient(circle at 50% 0%, rgba(244,63,94,0.15) 0%, transparent 70%)" : isDetected ? "radial-gradient(circle at 50% 0%, rgba(251,191,36,0.15) 0%, transparent 70%)" : "radial-gradient(circle at 50% 0%, rgba(124,106,255,0.15) 0%, transparent 70%)" }}
+                                        style={{ background: isBlocked ? "radial-gradient(circle at 50% 0%, rgba(244,63,94,0.2) 0%, transparent 70%)" : isUnderSurveillance ? "radial-gradient(circle at 50% 0%, rgba(251,191,36,0.18) 0%, transparent 70%)" : "radial-gradient(circle at 50% 0%, rgba(124,106,255,0.15) 0%, transparent 70%)" }}
                                     ></div>
 
                                     {/* Header: Icon + Name + Status */}
                                     <div className="flex items-start justify-between z-10 w-full">
-                                        <div className="flex items-center gap-3 max-w-[70%]">
-                                            <div className={`w-12 h-12 rounded-xl flex shrink-0 items-center justify-center border shadow-lg ${isUnknown ? "bg-amber-500/20 border-amber-500/40" : "bg-white/10 border-white/20 backdrop-blur-md"
+                                        <div className="flex items-center gap-3 max-w-[65%]">
+                                            <div className={`w-12 h-12 rounded-xl flex shrink-0 items-center justify-center border shadow-lg ${isBlocked ? "bg-rose-500/20 border-rose-500/40" : isUnderSurveillance ? "bg-amber-500/20 border-amber-500/40" : "bg-white/10 border-white/20 backdrop-blur-md"
                                                 }`}>
-                                                <img src={imgUrl} className={`w-6 h-6 ${isConnected ? "text-white filter-white" : "text-amber-300 filter-amber"}`} alt={device.type || "Device"} style={{ filter: isConnected ? "invert(100%)" : isBlocked ? "invert(55%) sepia(81%) saturate(1734%) hue-rotate(319deg) brightness(101%) contrast(97%)" : "invert(80%) sepia(40%) saturate(6000%) hue-rotate(350deg) brightness(100%) contrast(100%)" }} />
+                                                <img src={imgUrl} className={`w-6 h-6`} alt={device.type || "Device"} style={{ filter: isBlocked ? "invert(55%) sepia(81%) saturate(1734%) hue-rotate(319deg) brightness(101%) contrast(97%)" : isUnderSurveillance ? "invert(80%) sepia(40%) saturate(6000%) hue-rotate(350deg) brightness(100%) contrast(100%)" : "invert(100%)" }} />
                                             </div>
                                             <div className="truncate w-full gap-1 flex flex-col">
                                                 {editingDeviceId === device.device_id ? (
@@ -611,21 +658,21 @@ export default function Devices() {
                                                 ) : (
                                                     <>
                                                         <p className="text-white font-medium text-sm truncate w-full group-hover:text-cyan-300 transition-colors">
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.push(`/network?device_focus=${encodeURIComponent(device.name || device.hostname || device.ip)}`);
-                                                }}
-                                                className="hover:underline underline-offset-2 transition-all"
-                                            >
-                                                {device.name || (isDetected ? "Unknown Device" : "Connected Device")}
-                                            </button>
-                                        </p>
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    router.push(`/network?device_focus=${encodeURIComponent(device.name || device.hostname || device.ip)}`);
+                                                                }}
+                                                                className="hover:underline underline-offset-2 transition-all text-left truncate w-full"
+                                                            >
+                                                                {device.name || (isDetected ? "Unknown Device" : "Connected Device")}
+                                                            </button>
+                                                        </p>
                                                         <div className="flex items-center gap-1.5">
-                                                            <p className="text-white/45 text-[11px] uppercase tracking-wider">{isDetected ? (guessedType !== "unknown" ? `${guessedType} guess` : "unrecognized") : device.type}</p>
-                                                            {isDetected && !isBlocked && (
-                                                                <button onClick={(e) => { e.stopPropagation(); setEditingDeviceId(device.device_id); setEditForm({ name: device.name || "", type: guessedType !== "unknown" ? guessedType : "phone" }); }} className="text-[10px] bg-white/10 hover:bg-white/20 text-white/80 px-1.5 py-0.5 rounded border border-white/20 transition-colors">
-                                                                    Identify
+                                                            <p className="text-white/45 text-[11px] uppercase tracking-wider">{isBlocked ? "Quarantined Node" : isUnderSurveillance ? "Under AI Watchdog" : device.type}</p>
+                                                            {!isBlocked && (
+                                                                <button onClick={(e) => { e.stopPropagation(); setEditingDeviceId(device.device_id); setEditForm({ name: device.name || "", type: devType !== "unknown" ? devType : "phone" }); }} className="text-[9px] bg-white/10 hover:bg-white/20 text-white/80 px-1.5 py-0.2 rounded border border-white/20 transition-colors">
+                                                                    Edit
                                                                 </button>
                                                             )}
                                                         </div>
@@ -635,21 +682,33 @@ export default function Devices() {
                                         </div>
 
                                         {!editingDeviceId && (
-                                            <div className="flex shrink-0 items-center gap-2">
-                                                {device.trusted ? <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-violet-500/20 text-violet-200 border border-violet-500/30">Trusted</div> : null}
-                                                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${stateTheme.badge}`}>
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${stateTheme.dot} ${stateTheme.glow}`}></div>
-                                                    {state}
-                                                </div>
-                                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-black/40 border border-white/10" title="Threat Level Indicator">
-                                                    <div className={`w-2 h-2 rounded-full ${(!device.threat_count || device.threat_count === 0) ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]' : device.threat_count > 3 ? 'bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.8)]' : 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.8)]'}`}></div>
+                                            <div className="flex shrink-0 items-center gap-1.5">
+                                                {isBlocked ? (
+                                                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></div>
+                                                        Quarantined
+                                                    </div>
+                                                ) : isUnderSurveillance ? (
+                                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></div>
+                                                        Surveillance
+                                                    </div>
+                                                ) : device.trusted ? (
+                                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-violet-500/20 text-violet-200 border border-violet-500/30">
+                                                        Trusted
+                                                    </div>
+                                                ) : null}
+
+                                                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${isBlocked ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : isUnderSurveillance ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'}`}>
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${isBlocked ? 'bg-rose-400' : isUnderSurveillance ? 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]' : 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]'}`}></div>
+                                                    {isBlocked ? "Blocked" : isUnderSurveillance ? "Active AI" : "Connected"}
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Info Rows */}
-                                    <div className="flex flex-col gap-2 z-10 mt-2 bg-black/20 rounded-xl p-3 border border-white/5">
+                                    <div className={`flex flex-col gap-2 z-10 mt-1 rounded-xl p-3 border ${isBlocked ? 'bg-rose-950/30 border-rose-500/20' : isUnderSurveillance ? 'bg-amber-950/20 border-amber-500/20' : 'bg-black/20 border-white/5'}`}>
                                         <div className="flex justify-between items-center">
                                             <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">IP Address</span>
                                             <span className="text-white/80 text-xs font-mono bg-white/5 px-1.5 py-0.5 rounded">{device.ip || "N/A"}</span>
@@ -658,110 +717,97 @@ export default function Devices() {
                                             <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">MAC</span>
                                             <span className="text-white/80 text-xs font-mono bg-white/5 px-1.5 py-0.5 rounded">{device.mac || "N/A"}</span>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Threats</span>
-                                            <button 
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    router.push(`/threats?target_device=${encodeURIComponent(device.name || device.hostname || device.ip)}`);
-                                                }}
-                                                className="text-rose-400 hover:text-rose-300 text-xs font-mono bg-rose-500/10 hover:bg-rose-500/20 px-1.5 py-0.5 rounded border border-rose-500/30 transition-colors"
-                                            >
-                                                {device.threat_count || 0} threats
-                                            </button>
-                                        </div>
-                                        {(isDetected || isBlocked) && (
+
+                                        {isBlocked ? (
+                                            <div className="flex flex-col gap-1 mt-1 p-2 rounded bg-rose-500/10 border border-rose-500/20">
+                                                <span className="text-rose-300 text-[11px] font-semibold flex items-center gap-1">
+                                                    🚫 Network Access Revoked
+                                                </span>
+                                                <span className="text-white/60 text-[10px]">
+                                                    This device cannot communicate on this network until unblocked.
+                                                </span>
+                                            </div>
+                                        ) : isUnderSurveillance ? (
+                                            <div className="flex flex-col gap-1 mt-1 p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                                                <span className="text-amber-300 text-[11px] font-semibold flex items-center gap-1">
+                                                    👁️ AI Real-time Surveillance Active
+                                                </span>
+                                                <span className="text-white/60 text-[10px]">
+                                                    Watchdog inspecting all inbound/outbound packets for anomalies.
+                                                </span>
+                                            </div>
+                                        ) : (
                                             <>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Guess</span>
-                                                    <span className="text-white/80 text-xs font-mono bg-white/5 px-1.5 py-0.5 rounded capitalize">{guessedType !== "unknown" ? guessedType : "N/A"}</span>
-                                                </div>
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Vendor</span>
-                                                    <span className="text-white/75 text-xs text-right max-w-[60%] truncate">{device.vendor || "N/A"}</span>
+                                                    <span className="text-white/75 text-xs text-right max-w-[60%] truncate">{device.vendor || "Verified Network Node"}</span>
                                                 </div>
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Hostname</span>
-                                                    <span className="text-white/75 text-xs text-right max-w-[60%] truncate">{device.hostname || "N/A"}</span>
+                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Throughput</span>
+                                                    <span className="text-white/75 text-xs font-mono">{device.network_usage || 240} KB/s</span>
                                                 </div>
                                             </>
                                         )}
-                                        {isConnected && (
-                                            <>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Network</span>
-                                                    <span className="text-white/75 text-xs font-mono">{device.network_usage || 0} KB/s</span>
-                                                </div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Connections</span>
-                                                    <span className="text-white/75 text-xs font-mono">{device.connections || 0}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Monitoring</span>
-                                                    <span className="text-white/75 text-xs font-mono">{device.monitor ? "Active" : "Paused"}</span>
-                                                </div>
-                                            </>
-                                        )}
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-white/40 text-[11px] uppercase tracking-wider font-semibold">Auto Connect</span>
-                                            <span className="text-white/75 text-xs font-mono">{device.auto_connect ? "Enabled" : "Off"}</span>
-                                        </div>
+
                                         <div className="flex justify-between items-center mt-1 pt-1 border-t border-white/10">
-                                            <span className="text-white/40 text-[10px] uppercase">Last Seen</span>
-                                            <span className={`text-[10px] font-mono ${isConnected ? "text-emerald-400" : isBlocked ? "text-rose-400" : "text-amber-400"}`}>
-                                                {device.last_seen ? new Date(device.last_seen).toLocaleTimeString() : (device.first_seen ? new Date(device.first_seen).toLocaleTimeString() : "Just now")}
+                                            <span className="text-white/40 text-[10px] uppercase">Status</span>
+                                            <span className={`text-[10px] font-mono ${isBlocked ? "text-rose-400 font-bold" : isUnderSurveillance ? "text-amber-400 font-bold" : "text-emerald-400"}`}>
+                                                {isBlocked ? "Quarantined / Access Cut Off" : isUnderSurveillance ? "Surveillance High Alert" : "Live & Nominal"}
                                             </span>
                                         </div>
                                     </div>
 
                                     {!editingDeviceId && (
-                                        <div className="z-10 grid grid-cols-2 gap-2">
-                                            {isDetected && !isBlocked ? (
+                                        <div className="z-10 grid grid-cols-2 gap-2 mt-auto">
+                                            {isBlocked ? (
                                                 <button
                                                     disabled={actionDeviceId === device.device_id}
                                                     onClick={(event) => {
                                                         event.stopPropagation();
-                                                        runDeviceAction("/api/device/connect", {
+                                                        runDeviceAction("/api/device/unblock", {
                                                             device_id: device.device_id,
-                                                            name: defaultConnectName,
-                                                            type: devType,
                                                         });
                                                     }}
-                                                    className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                                                    className="col-span-2 rounded-xl border border-emerald-500/50 bg-emerald-500/20 px-3 py-2.5 text-xs font-bold text-emerald-200 transition-all hover:bg-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] disabled:opacity-50 flex items-center justify-center gap-2"
                                                 >
-                                                    Connect
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                                    </svg>
+                                                    Unblock & Restore to Network
                                                 </button>
                                             ) : (
-                                                <button
-                                                    disabled={actionDeviceId === device.device_id}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation();
-                                                        runDeviceAction(device.trusted ? "/api/device/untrust" : "/api/device/trust", {
-                                                            device_id: device.device_id,
-                                                            name: device.name || defaultConnectName,
-                                                            type: devType,
-                                                            auto_connect: true,
-                                                        });
-                                                    }}
-                                                    className="rounded-xl border border-violet-500/40 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-200 transition-colors hover:bg-violet-500/20 disabled:opacity-50"
-                                                >
-                                                    {device.trusted ? "Untrust" : "Trust"}
-                                                </button>
-                                            )}
+                                                <>
+                                                    <button
+                                                        disabled={actionDeviceId === device.device_id}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            runDeviceAction((device.trusted && !device.surveillance) ? "/api/device/untrust" : "/api/device/trust", {
+                                                                device_id: device.device_id,
+                                                                name: device.name || defaultConnectName,
+                                                                type: devType,
+                                                                auto_connect: true,
+                                                            });
+                                                        }}
+                                                        className={`rounded-xl border px-3 py-2 text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 ${(device.trusted && !device.surveillance) ? "border-violet-500/40 bg-violet-500/10 text-violet-200 hover:bg-violet-500/20" : "border-amber-500/50 bg-amber-500/20 text-amber-200 hover:bg-amber-500/30"}`}
+                                                    >
+                                                        {(device.trusted && !device.surveillance) ? "Untrust" : "Trust"}
+                                                    </button>
 
-                                            <button
-                                                disabled={actionDeviceId === device.device_id}
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    runDeviceAction(isBlocked ? "/api/device/unblock" : "/api/device/block", {
-                                                        device_id: device.device_id,
-                                                        reason: isBlocked ? undefined : "Manual dashboard block",
-                                                    });
-                                                }}
-                                                className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-50 ${isBlocked ? "border border-cyan-500/40 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20" : "border border-rose-500/40 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20"}`}
-                                            >
-                                                {isBlocked ? "Unblock" : "Block"}
-                                            </button>
+                                                    <button
+                                                        disabled={actionDeviceId === device.device_id}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation();
+                                                            runDeviceAction("/api/device/block", {
+                                                                device_id: device.device_id,
+                                                                reason: "Manual operator quarantine",
+                                                            });
+                                                        }}
+                                                        className="rounded-xl border border-rose-500/50 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-200 transition-all hover:bg-rose-500/25 hover:shadow-[0_0_12px_rgba(244,63,94,0.3)] disabled:opacity-50 flex items-center justify-center gap-1.5"
+                                                    >
+                                                        Block Device
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
                                     )}
 

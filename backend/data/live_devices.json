@@ -18,8 +18,8 @@
     "threat_count": 0,
     "network_usage": 2000,
     "connections": 8,
-    "cpu": 90,
-    "latency_ms": 74,
+    "cpu": 95,
+    "latency_ms": 32,
     "first_seen": "2026-08-23T06:47:49Z",
     "last_seen": "2026-08-23T06:47:49Z"
   },
@@ -42,8 +42,8 @@
     "threat_count": 0,
     "network_usage": 4000,
     "connections": 8,
-    "cpu": 90,
-    "latency_ms": 154,
+    "cpu": 95,
+    "latency_ms": 35,
     "first_seen": "2026-08-23T06:47:54Z",
     "last_seen": "2026-08-23T06:47:54Z"
   },
@@ -66,10 +66,10 @@
     "threat_count": 0,
     "network_usage": 3800,
     "connections": 10,
-    "cpu": 90,
-    "latency_ms": 146,
+    "cpu": 95,
+    "latency_ms": 82,
     "first_seen": "2026-08-23T06:47:54Z",
-    "last_seen": "2026-08-23T06:47:54Z"
+    "last_seen": "2026-08-23T06:55:55Z"
   },
   {
     "_id": "dev_current-pc-wifi",
@@ -90,8 +90,8 @@
     "threat_count": 0,
     "network_usage": 4125,
     "connections": 13,
-    "cpu": 90,
-    "latency_ms": 159,
+    "cpu": 95,
+    "latency_ms": 32,
     "first_seen": "2026-08-23T06:47:54Z",
     "last_seen": "2026-08-23T06:47:54Z"
   },
@@ -114,9 +114,9 @@
     "threat_count": 0,
     "network_usage": 3425,
     "connections": 5,
-    "cpu": 90,
-    "latency_ms": 131,
+    "cpu": 95,
+    "latency_ms": 35,
     "first_seen": "2026-08-23T06:47:54Z",
-    "last_seen": "2026-08-23T06:47:54Z"
+    "last_seen": "2026-08-23T06:55:37Z"
   }
 ]
