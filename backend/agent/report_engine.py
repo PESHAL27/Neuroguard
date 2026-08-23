@@ -11,8 +11,10 @@ import io
 import csv
 import json
 import re
-import os
-import boto3
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 try:
     from db import db, sync_db

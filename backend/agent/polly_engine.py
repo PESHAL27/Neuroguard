@@ -1,4 +1,7 @@
-import boto3
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 import os
 import base64
 from dotenv import load_dotenv
@@ -8,6 +11,8 @@ load_dotenv(dotenv_path="../frontend/.env.local")
 # Amazon Polly Client
 # We use the region from env or fallback to us-east-1
 def get_polly():
+    if not boto3:
+        return None
     return boto3.client(
         'polly',
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
