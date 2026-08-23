@@ -15,11 +15,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 729,
+    "latency_ms": 1457,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_76",
@@ -37,11 +37,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 737,
+    "latency_ms": 1699,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_91",
@@ -59,11 +59,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 744,
+    "latency_ms": 1692,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_103",
@@ -85,7 +85,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_168",
@@ -103,11 +103,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 734,
+    "latency_ms": 1688,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_173",
@@ -125,11 +125,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 726,
+    "latency_ms": 1693,
     "network_usage": 3200,
     "connections": 12,
     "cpu": 85,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   },
   {
     "_id": "dev_device_192_168_31_207",
@@ -147,10 +147,10 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 738,
+    "latency_ms": 1787,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T12:12:28Z"
+    "last_seen": "2026-08-23T12:24:19Z"
   }
 ]
