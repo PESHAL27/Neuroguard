@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -115,6 +115,17 @@ export default function Devices() {
     const [editingDeviceId, setEditingDeviceId] = useState(null);
     const [editForm, setEditForm] = useState({ name: "", type: "phone" });
     const [networkStats, setNetworkStats] = useState({ grade: "A+", status: "Secure", uptime_percent: 99.9, bandwidth_tb: 12.4 });
+    const lastDevicesHashRef = useRef("");
+
+    const updateDevicesState = (data) => {
+        if (!Array.isArray(data)) return;
+        const uniqueData = Array.from(new Map(data.map(item => [item._id || item.device_id || item.mac || item.id, item])).values());
+        const hash = JSON.stringify(uniqueData.map(d => [d.device_id || d._id, d.name, d.connected, d.blocked, d.trusted, d.surveillance, d.status, d.ip, d.threat_count]));
+        if (hash !== lastDevicesHashRef.current) {
+            lastDevicesHashRef.current = hash;
+            setDevices(uniqueData);
+        }
+    };
 
     const loadDevices = async () => {
         try {
@@ -123,8 +134,7 @@ export default function Devices() {
                 throw new Error(`HTTP ${response.status}`);
             }
             const data = await response.json();
-            const uniqueData = Array.from(new Map(data.map(item => [item._id || item.device_id || item.mac || item.id, item])).values());
-            setDevices(uniqueData);
+            updateDevicesState(data);
         } catch (error) {
             console.error("Failed to load devices:", error);
         }
@@ -138,23 +148,28 @@ export default function Devices() {
                 fetchApi("/api/network/traffic", { cache: "no-store" }).catch(() => null),
             ]);
             
-            let newStats = { ...networkStats };
+            let grade = "A+";
+            let status = "Secure";
+            let uptime_percent = 99.9;
+            let bandwidth_tb = 12.4;
+
             if (healthRes && healthRes.ok) {
-                const health = await healthRes.json();
-                newStats.grade = health.grade;
-                newStats.status = health.status;
+                const healthData = await healthRes.json();
+                grade = healthData.security_score >= 90 ? "A+" : healthData.security_score >= 80 ? "A" : healthData.security_score >= 70 ? "B" : "C";
+                status = healthData.status || "Secure";
             }
             if (uptimeRes && uptimeRes.ok) {
-                const uptime = await uptimeRes.json();
-                newStats.uptime_percent = uptime.uptime_percent;
+                const uptimeData = await uptimeRes.json();
+                uptime_percent = uptimeData.uptime_percent || 99.9;
             }
             if (trafficRes && trafficRes.ok) {
-                const traffic = await trafficRes.json();
-                newStats.bandwidth_tb = traffic.bandwidth_tb;
+                const trafficData = await trafficRes.json();
+                bandwidth_tb = trafficData.bandwidth_tb || 12.4;
             }
-            setNetworkStats(newStats);
+
+            setNetworkStats({ grade, status, uptime_percent, bandwidth_tb });
         } catch (e) {
-            console.error(e);
+            // Keep default fallback network stats
         }
     };
 
@@ -174,19 +189,19 @@ export default function Devices() {
         });
     };
 
-    const runDeviceAction = async (path, body) => {
-        setActionDeviceId(body.device_id);
-        setRenameError("");
+    const runDeviceAction = async (endpoint, payload) => {
+        setActionDeviceId(payload.device_id);
         try {
-            const response = await fetchApi(path, {
+            const response = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body),
+                body: JSON.stringify(payload),
             });
-            const result = await response.json().catch(() => null);
-            if (!response.ok || result?.status === "error") {
-                throw new Error(result?.message || `Request failed with HTTP ${response.status}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Action failed with status ${response.status}`);
             }
+            const result = await response.json();
             upsertLocalDevice(result?.device);
             return result;
         } catch (error) {
@@ -205,9 +220,9 @@ export default function Devices() {
 
         loadDevices();
         loadStats();
-        // Fast polling fallback every 1.5s for instant reactivity
-        pollTimer = setInterval(loadDevices, 1500);
-        statsTimer = setInterval(loadStats, 5000);
+        // Stable polling interval for smooth background sync
+        pollTimer = setInterval(loadDevices, 2000);
+        statsTimer = setInterval(loadStats, 6000);
 
         // SSE Real-time Live Network Stream
         try {
@@ -218,10 +233,7 @@ export default function Devices() {
             eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    if (Array.isArray(data)) {
-                        const uniqueData = Array.from(new Map(data.map(item => [item._id || item.device_id || item.mac || item.id, item])).values());
-                        setDevices(uniqueData);
-                    }
+                    updateDevicesState(data);
                 } catch (e) {}
             };
             eventSource.onerror = () => {

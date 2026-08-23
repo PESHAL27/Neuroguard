@@ -19,8 +19,8 @@ export async function GET(req) {
             // Immediate initial snapshot
             sendUpdate();
 
-            // Push updates every 250ms for instant real-time response
-            intervalId = setInterval(sendUpdate, 250);
+            // Push updates every 1000ms for smooth, flicker-free live response
+            intervalId = setInterval(sendUpdate, 1000);
         },
         cancel() {
             if (intervalId) clearInterval(intervalId);

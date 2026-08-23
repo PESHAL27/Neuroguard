@@ -15,11 +15,33 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 136,
+    "latency_ms": 50,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
+  },
+  {
+    "_id": "dev_device_20e7c8ab7f08",
+    "device_id": "device_20e7c8ab7f08",
+    "name": "Connected Device (202)",
+    "hostname": "device-202.lan",
+    "ip": "192.168.31.202",
+    "mac": "20:E7:C8:AB:7F:08",
+    "type": "laptop",
+    "type_guess": "laptop",
+    "vendor": "Connected Network Node",
+    "status": "connected",
+    "connected": true,
+    "trusted": true,
+    "surveillance": false,
+    "blocked": false,
+    "threat_count": 0,
+    "latency_ms": 50,
+    "network_usage": 450,
+    "connections": 4,
+    "cpu": 25,
+    "last_seen": "2026-08-23T07:49:27Z"
   },
   {
     "_id": "dev_dev_192_168_31_173",
@@ -37,11 +59,11 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 59,
+    "latency_ms": 185,
     "network_usage": 3200,
     "connections": 12,
     "cpu": 85,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
   },
   {
     "_id": "dev_device_00b00bf34175",
@@ -63,7 +85,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
   },
   {
     "_id": "dev_device_a2fe23b938bd",
@@ -85,7 +107,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
   },
   {
     "_id": "dev_device_fcb0de23d9ec",
@@ -103,11 +125,33 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 62,
+    "latency_ms": 185,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
+  },
+  {
+    "_id": "dev_device_564bd3927a39",
+    "device_id": "device_564bd3927a39",
+    "name": "Realme NARZO 80 Lite 5G",
+    "hostname": "realme-NARZO-80-Lite-5G.lan",
+    "ip": "192.168.31.207",
+    "mac": "56:4B:D3:92:7A:39",
+    "type": "phone",
+    "type_guess": "phone",
+    "vendor": "Realme Mobile Corporation",
+    "status": "connected",
+    "connected": true,
+    "trusted": true,
+    "surveillance": false,
+    "blocked": false,
+    "threat_count": 0,
+    "latency_ms": 185,
+    "network_usage": 450,
+    "connections": 4,
+    "cpu": 25,
+    "last_seen": "2026-08-23T07:49:27Z"
   },
   {
     "_id": "dev_device_1407083582c9",
@@ -125,10 +169,32 @@
     "surveillance": false,
     "blocked": false,
     "threat_count": 0,
-    "latency_ms": 71,
+    "latency_ms": 184,
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-23T07:34:52Z"
+    "last_seen": "2026-08-23T07:49:27Z"
+  },
+  {
+    "_id": "dev_device_a2b56eb4318e",
+    "device_id": "device_a2b56eb4318e",
+    "name": "Connected Device (119)",
+    "hostname": "device-119.lan",
+    "ip": "192.168.31.119",
+    "mac": "A2:B5:6E:B4:31:8E",
+    "type": "laptop",
+    "type_guess": "laptop",
+    "vendor": "Connected Network Node",
+    "status": "connected",
+    "connected": true,
+    "trusted": true,
+    "surveillance": false,
+    "blocked": false,
+    "threat_count": 0,
+    "latency_ms": 50,
+    "network_usage": 450,
+    "connections": 4,
+    "cpu": 25,
+    "last_seen": "2026-08-23T07:49:27Z"
   }
 ]

@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { getWsBaseUrl } from "@/lib/api";
+import { useState, useEffect, useRef } from "react";
 
 const getCards = (stats) => [
     {
@@ -18,18 +17,19 @@ const getCards = (stats) => [
         shadowHover: "hover:shadow-[0_0_40px_rgba(6,182,212,0.4)]",
     },
     {
-        label: "Detected Devices",
+        label: "AI Surveillance",
         value: stats.detected,
         icon: (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 4.5v15m7.5-7.5h-15" />
+                <path d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
         ),
         bgClasses: "bg-gradient-to-br from-amber-500 via-orange-500 to-yellow-500",
         shadowHover: "hover:shadow-[0_0_40px_rgba(245,158,11,0.4)]",
     },
     {
-        label: "Blocked Devices",
+        label: "Quarantined / Blocked",
         value: stats.blocked,
         icon: (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -37,8 +37,8 @@ const getCards = (stats) => [
                 <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
             </svg>
         ),
-        bgClasses: "bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500",
-        shadowHover: "hover:shadow-[0_0_40px_rgba(16,185,129,0.4)]",
+        bgClasses: "bg-gradient-to-br from-rose-500 via-pink-600 to-red-500",
+        shadowHover: "hover:shadow-[0_0_40px_rgba(244,63,94,0.4)]",
     },
     {
         label: "Trusted Devices",
@@ -51,53 +51,60 @@ const getCards = (stats) => [
         ),
         bgClasses: "bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500",
         shadowHover: "hover:shadow-[0_0_40px_rgba(168,85,247,0.4)]",
-        isScore: false,
     },
 ];
 
-function ScoreRing({ value }) {
-    const safeValue = typeof value === 'number' ? value : 0;
-    const radius = 32;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (safeValue / 100) * circumference;
-
-    return (
-        <div className="relative w-[80px] h-[80px] flex-shrink-0">
-            <svg width="80" height="80" viewBox="0 0 80 80" className="transform -rotate-90 drop-shadow-lg">
-                <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="6" />
-                <motion.circle
-                    cx="40" cy="40" r={radius} fill="none"
-                    stroke="#ffffff" strokeWidth="6" strokeLinecap="round"
-                    strokeDasharray={circumference} strokeDashoffset={circumference}
-                    animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
-                />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                {/* Decorative inner wave/dot */}
-                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            </div>
-        </div>
-    );
-}
-
 export default function SecurityStatusCards() {
     const [stats, setStats] = useState({ connected: 0, detected: 0, blocked: 0, trusted: 0 });
+    const lastStatsRef = useRef(stats);
+
+    const updateStatsFromDevices = (devices) => {
+        if (!Array.isArray(devices)) return;
+        const connected = devices.filter(d => d.connected && !d.blocked).length;
+        const detected = devices.filter(d => (d.surveillance || d.trusted === false) && !d.blocked).length;
+        const blocked = devices.filter(d => d.blocked).length;
+        const trusted = devices.filter(d => d.trusted && !d.blocked && !d.surveillance).length;
+
+        const prev = lastStatsRef.current;
+        if (prev.connected !== connected || prev.detected !== detected || prev.blocked !== blocked || prev.trusted !== trusted) {
+            const next = { connected, detected, blocked, trusted };
+            lastStatsRef.current = next;
+            setStats(next);
+        }
+    };
 
     useEffect(() => {
-        const socket = new WebSocket(`${getWsBaseUrl()}/ws/dashboard`);
+        let isMounted = true;
 
-        socket.onmessage = (event) => {
+        const loadStats = async () => {
             try {
-                const data = JSON.parse(event.data);
-                setStats(data);
-            } catch (e) {
-                console.error("WebSocket message parsing error:", e);
-            }
+                const res = await fetch("/api/devices");
+                if (res.ok && isMounted) {
+                    const data = await res.json();
+                    updateStatsFromDevices(data);
+                }
+            } catch (e) {}
         };
 
+        loadStats();
+        const pollInterval = setInterval(loadStats, 1500);
+
+        let eventSource;
+        try {
+            eventSource = new EventSource("/api/devices/stream");
+            eventSource.onmessage = (event) => {
+                if (!isMounted) return;
+                try {
+                    const data = JSON.parse(event.data);
+                    updateStatsFromDevices(data);
+                } catch (e) {}
+            };
+        } catch (e) {}
+
         return () => {
-            socket.close();
+            isMounted = false;
+            clearInterval(pollInterval);
+            if (eventSource) eventSource.close();
         };
     }, []);
 
@@ -108,12 +115,12 @@ export default function SecurityStatusCards() {
             {cards.map((card, i) => (
                 <motion.div
                     key={card.label}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.1, duration: 0.5, type: "spring" }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05, duration: 0.3 }}
                     className={`relative rounded-3xl ${card.bgClasses} p-6 overflow-hidden transition-all duration-300 ${card.shadowHover} text-white shadow-xl shadow-black/20`}
                 >
-                    {/* Inner highlight (liquid glass top edge effect) */}
+                    {/* Inner highlight */}
                     <div className="absolute inset-0 rounded-3xl border border-white/30 pointer-events-none" style={{ maskImage: 'linear-gradient(to bottom, white 0%, transparent 20%)', WebkitMaskImage: 'linear-gradient(to bottom, white 0%, transparent 20%)' }} />
 
                     {/* Background decorative blob */}
@@ -128,30 +135,10 @@ export default function SecurityStatusCards() {
                         </div>
 
                         <div className="flex items-end justify-between mt-4">
-                            {!card.isScore ? (
-                                <motion.div
-                                    className="text-5xl font-light tracking-tight"
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.1 + 0.3 }}
-                                >
-                                    {card.value}
-                                    <span className="text-2xl font-normal opacity-80 ml-1">{card.suffix || ""}</span>
-                                </motion.div>
-                            ) : (
-                                <div className="flex items-center justify-between w-full">
-                                    <motion.div
-                                        className="text-5xl font-light tracking-tight"
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: i * 0.1 + 0.3 }}
-                                    >
-                                        {card.value}
-                                        <span className="text-2xl font-normal opacity-80">{card.suffix}</span>
-                                    </motion.div>
-                                    <ScoreRing value={card.value} />
-                                </div>
-                            )}
+                            <div className="text-5xl font-bold tracking-tight">
+                                {card.value}
+                                <span className="text-2xl font-normal opacity-80 ml-1">{card.suffix || ""}</span>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
