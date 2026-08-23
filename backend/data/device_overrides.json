@@ -76,7 +76,7 @@
     "trusted": false,
     "surveillance": false,
     "reason": "Exceeded burst rate threshold (6 reqs in 3s) targeting ESP32 Camera.",
-    "blocked_at": "2026-08-23T11:20:37.265Z"
+    "blocked_at": "2026-08-23T11:55:39.861Z"
   },
   "10.185.191.199": {
     "ip": "10.185.191.199",
@@ -84,6 +84,6 @@
     "trusted": false,
     "surveillance": false,
     "reason": "Exceeded burst rate threshold (6 reqs in 3s) targeting ESP32 Camera.",
-    "blocked_at": "2026-08-23T11:20:37.265Z"
+    "blocked_at": "2026-08-23T11:55:39.861Z"
   }
 }
