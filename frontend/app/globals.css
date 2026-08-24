@@ -39,12 +39,9 @@ body {
 
 /* Glow animation for active indicators */
 @keyframes glow-pulse {
-
-  0%,
-  100% {
+  0%, 100% {
     box-shadow: 0 0 4px currentColor;
   }
-
   50% {
     box-shadow: 0 0 12px currentColor;
   }
@@ -54,10 +51,40 @@ body {
   animation: glow-pulse 2s ease-in-out infinite;
 }
 
-/* 
-  Liquid Glass implementation for dashboard cards 
-  Includes Safari specific fixes (translateZ, backface-visibility) to prevent scrolling flickers
-*/
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  transform-origin: 50% 50%;
+  animation: radar-sweep 12s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.15;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Liquid Glass */
 .liquid-glass {
   background: rgba(255, 255, 255, 0.03);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -82,7 +109,6 @@ body {
   backface-visibility: hidden;
 }
 
-/* Force Safari to use hardware acceleration on glass children */
 .liquid-glass * {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);

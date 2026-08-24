@@ -427,27 +427,30 @@ class NetworkScanner:
         self.running = True
         
         while self.running:
-            timestamp = datetime.utcnow().isoformat()
-            now = time.monotonic()
+            try:
+                timestamp = datetime.utcnow().isoformat()
+                now = time.monotonic()
 
-            if now - self._last_deep_scan_at >= self.deep_scan_interval_seconds:
-                active_devices = await asyncio.to_thread(self.scan)
-                self._update_fingerprint_cache(active_devices)
-                self._last_deep_scan_at = now
-            else:
-                active_devices = await asyncio.to_thread(self.scan_presence)
+                if now - self._last_deep_scan_at >= self.deep_scan_interval_seconds:
+                    active_devices = await asyncio.to_thread(self.scan)
+                    self._update_fingerprint_cache(active_devices)
+                    self._last_deep_scan_at = now
+                else:
+                    active_devices = await asyncio.to_thread(self.scan_presence)
 
-            active_devices = [
-                device for device in active_devices
-                if device.get("ip") != self.local_ip and not str(device.get("ip", "")).endswith(".1")
-            ]
+                active_devices = [
+                    device for device in active_devices
+                    if device.get("ip") != self.local_ip and not str(device.get("ip", "")).endswith(".1")
+                ]
 
-            active_device_ids = set()
-            for device in active_devices:
-                device_id = await self._reconcile_active_device(device, timestamp)
-                active_device_ids.add(device_id)
+                active_device_ids = set()
+                for device in active_devices:
+                    device_id = await self._reconcile_active_device(device, timestamp)
+                    active_device_ids.add(device_id)
 
-            await self._cleanup_stale_devices(active_device_ids, timestamp)
+                await self._cleanup_stale_devices(active_device_ids, timestamp)
+            except Exception as e:
+                pass
             await asyncio.sleep(self.presence_interval_seconds)
 
     def stop(self):

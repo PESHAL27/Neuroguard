@@ -16,6 +16,7 @@ from agent.report_engine import (
 from agent.metrics_engine import get_soc_metrics
 from agent.telemetry_engine import process_telemetry
 from agent.timeline_engine import record_event, get_events
+from live_scanner import start_scanner_background, perform_full_scan, get_active_network_details
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import asyncio
@@ -500,7 +501,13 @@ async def startup_event():
     event_dispatcher.on("threat_created", _on_threat_for_timeline)
 
     monitor.start()
-    asyncio.create_task(scanner.start())
+    try:
+        if db is not None:
+            asyncio.create_task(scanner.start())
+    except Exception:
+        pass
+    # Start dynamic multi-subnet live scanner background thread
+    start_scanner_background()
 
 # Setup CORS for frontend communication
 app.add_middleware(
@@ -510,6 +517,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/api/scan/network-info")
+async def get_network_info_api():
+    """Returns current active interface, local IP, gateway, and subnet CIDR."""
+    return get_active_network_details()
+
+@app.post("/api/scan/rescan")
+async def trigger_force_rescan():
+    """Forces an immediate sweep of the active subnet."""
+    devices = await asyncio.to_thread(perform_full_scan)
+    return {"status": "ok", "devices_count": len(devices), "devices": devices}
 
 class ThreatDetectionRequest(BaseModel):
     source_ip: str

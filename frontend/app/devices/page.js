@@ -115,7 +115,35 @@ export default function Devices() {
     const [editingDeviceId, setEditingDeviceId] = useState(null);
     const [editForm, setEditForm] = useState({ name: "", type: "phone" });
     const [networkStats, setNetworkStats] = useState({ grade: "A+", status: "Secure", uptime_percent: 99.9, bandwidth_tb: 12.4 });
+    const [networkInfo, setNetworkInfo] = useState({ local_ip: "...", gateway_ip: "...", subnet_cidr: "...", interface: "Wi-Fi" });
+    const [isScanning, setIsScanning] = useState(false);
     const lastDevicesHashRef = useRef("");
+
+    const loadNetworkInfo = async () => {
+        try {
+            const res = await fetch("/api/network/info", { cache: "no-store" });
+            if (res.ok) {
+                const data = await res.json();
+                setNetworkInfo(data);
+            }
+        } catch (e) {}
+    };
+
+    const handleRescan = async () => {
+        setIsScanning(true);
+        try {
+            const res = await fetch("/api/devices/rescan", { method: "POST" });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.devices) updateDevicesState(data.devices);
+                if (data.network) setNetworkInfo(data.network);
+            }
+        } catch (e) {
+            console.error("Rescan failed", e);
+        } finally {
+            setTimeout(() => setIsScanning(false), 800);
+        }
+    };
 
     const updateDevicesState = (data) => {
         if (!Array.isArray(data)) return;
@@ -142,6 +170,7 @@ export default function Devices() {
 
     const loadStats = async () => {
         try {
+            loadNetworkInfo();
             const [healthRes, uptimeRes, trafficRes] = await Promise.all([
                 fetchApi("/api/network/health", { cache: "no-store" }).catch(() => null),
                 fetchApi("/api/system/uptime", { cache: "no-store" }).catch(() => null),
@@ -372,6 +401,59 @@ export default function Devices() {
                 initial="hidden"
                 animate="show"
             >
+                {/* ===== LIVE SUBNET & SCANNER STATUS BAR ===== */}
+                <motion.div
+                    variants={itemVariants}
+                    className="w-full bg-[#0d0f22]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 md:px-6 flex flex-wrap items-center justify-between gap-4 shadow-xl"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="relative flex items-center justify-center">
+                            <span className="relative flex h-3.5 w-3.5">
+                                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isScanning ? "bg-cyan-400" : "bg-emerald-400"}`}></span>
+                                <span className={`relative inline-flex rounded-full h-3.5 w-3.5 ${isScanning ? "bg-cyan-500" : "bg-emerald-500"}`}></span>
+                            </span>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-white tracking-wide">Live Adaptive Network Monitor</span>
+                                <span className="text-xs bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono px-2 py-0.5 rounded-md">
+                                    {networkInfo.interface || "Active Interface"}
+                                </span>
+                            </div>
+                            <span className="text-xs text-white/50 font-mono">
+                                Subnet: <strong className="text-white/80">{networkInfo.subnet_cidr}</strong> &nbsp;•&nbsp; 
+                                Gateway: <strong className="text-white/80">{networkInfo.gateway_ip}</strong> &nbsp;•&nbsp; 
+                                Host IP: <strong className="text-cyan-400 font-bold">{networkInfo.local_ip}</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="text-xs text-white/60 font-mono bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 hidden sm:block">
+                            <span>📡 Realtime Layer 2 ARP &amp; Socket Probe</span>
+                        </div>
+                        <button
+                            onClick={handleRescan}
+                            disabled={isScanning}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-lg cursor-pointer ${
+                                isScanning
+                                    ? "bg-cyan-600/50 text-cyan-200 cursor-not-allowed border border-cyan-400/40"
+                                    : "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white border border-cyan-400/30 hover:shadow-cyan-500/25"
+                            }`}
+                        >
+                            <svg
+                                className={`w-4 h-4 ${isScanning ? "animate-spin" : ""}`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>{isScanning ? "Scanning Subnet..." : "Scan Network"}</span>
+                        </button>
+                    </div>
+                </motion.div>
+
                 {/* ===== TOP OVERVIEW SECTION ===== */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 

@@ -2,7 +2,14 @@ import fs from "fs";
 import path from "path";
 
 function getPaths() {
-    const dataDir = path.join("C:\\Users\\pecul\\Desktop\\Peshal\\college\\Hackathon\\Neuroguard", "backend", "data");
+    // Dynamically resolve backend/data directory relative to project root or workspace
+    const baseDir = process.cwd().includes("frontend") 
+        ? path.join(process.cwd(), "..", "backend", "data")
+        : path.join(process.cwd(), "backend", "data");
+
+    const fallbackDir = path.join("C:\\Users\\pecul\\Desktop\\Peshal\\college\\Hackathon\\Neuroguard", "backend", "data");
+    const dataDir = fs.existsSync(baseDir) ? baseDir : fallbackDir;
+
     try {
         if (!fs.existsSync(dataDir)) {
             fs.mkdirSync(dataDir, { recursive: true });
@@ -12,6 +19,24 @@ function getPaths() {
     return {
         liveScan: path.join(dataDir, "live_devices.json"),
         overrides: path.join(dataDir, "device_overrides.json"),
+        networkInfo: path.join(dataDir, "network_info.json"),
+    };
+}
+
+export function getNetworkInfo() {
+    const { networkInfo } = getPaths();
+    if (fs.existsSync(networkInfo)) {
+        try {
+            return JSON.parse(fs.readFileSync(networkInfo, "utf8"));
+        } catch (e) {
+            console.error("Error reading network_info.json:", e.message);
+        }
+    }
+    return {
+        local_ip: "127.0.0.1",
+        gateway_ip: "127.0.0.1",
+        subnet_cidr: "127.0.0.0/24",
+        interface: "Wi-Fi / Ethernet",
     };
 }
 

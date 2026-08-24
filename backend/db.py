@@ -22,7 +22,7 @@ if _is_atlas:
         serverSelectionTimeoutMS=10000,
     )
 else:
-    _conn_opts = dict(serverSelectionTimeoutMS=10000)
+    _conn_opts = dict(serverSelectionTimeoutMS=1500)
 
 # Async client for FastAPI + WebSockets
 client = AsyncIOMotorClient(MONGO_URI, **_conn_opts)
