@@ -19,7 +19,7 @@
     "network_usage": 1200,
     "connections": 32,
     "cpu": 15,
-    "last_seen": "2026-08-24T14:38:04Z",
+    "last_seen": "2026-08-24T15:08:42Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
@@ -43,7 +43,7 @@
     "network_usage": 3500,
     "connections": 14,
     "cpu": 82,
-    "last_seen": "2026-08-24T14:38:04Z",
+    "last_seen": "2026-08-24T15:08:42Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
@@ -67,17 +67,17 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-24T14:38:04Z",
+    "last_seen": "2026-08-24T15:08:42Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
   {
-    "_id": "dev_device_192_168_1_5",
-    "device_id": "device_192_168_1_5",
-    "name": "Smartphone (Mobile Node 5)",
-    "hostname": "node-5.lan",
-    "ip": "192.168.1.5",
-    "mac": "7E:2D:E0:7D:91:FE",
+    "_id": "dev_device_192_168_1_4",
+    "device_id": "device_192_168_1_4",
+    "name": "Smartphone (Mobile Node 4)",
+    "hostname": "node-4.lan",
+    "ip": "192.168.1.4",
+    "mac": "9A:B4:AC:76:2D:D2",
     "type": "phone",
     "type_guess": "phone",
     "vendor": "Apple / Android Mobile",
@@ -91,7 +91,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-24T14:38:04Z",
+    "last_seen": "2026-08-24T15:08:42Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   }

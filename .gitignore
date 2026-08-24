@@ -7,4 +7,4 @@ build/
 .env*
 venv/
 __pycache__/
-
+scratch/

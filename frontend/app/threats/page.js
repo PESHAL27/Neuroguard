@@ -533,7 +533,14 @@ export default function Threats() {
                                 <div className="text-sm text-white/45">No autonomous responses recorded.</div>
                             ) : actions.map((action, index) => (
                                 <div key={action._id || index} className="flex items-center gap-3 p-2 border-l-2 border-emerald-500 bg-white/[0.02]">
-                                    <span className="text-emerald-400/50 text-[10px] font-mono shrink-0">{new Date(action.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+                                    <span className="text-emerald-400/50 text-[10px] font-mono shrink-0">
+                                        {(() => {
+                                            const d = action.timestamp ? new Date(action.timestamp) : null;
+                                            return d && !isNaN(d.getTime())
+                                                ? d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+                                                : new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+                                        })()}
+                                    </span>
                                     <span className="text-white/80 text-[11px] font-bold uppercase w-28 shrink-0">{action.action}</span>
                                     <span className="text-white/40 text-[10px] truncate">{action.detail}</span>
                                 </div>

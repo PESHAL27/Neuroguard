@@ -61,9 +61,14 @@ export default function AutoResponseLog() {
                                     <div>
                                         <h4 className="text-sm font-medium text-white/95 group-hover:text-white transition-colors">{response.action}</h4>
                                         <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-xs font-mono text-white/60 text-ellipsis overflow-hidden max-w-[120px]">{response.ip || response.target || "System"}</span>
-                                            <span className="w-1 h-1 rounded-full bg-white/30" />
-                                            <span className="text-xs text-white/50">{new Date(response.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                                            <span className="text-xs text-white/50">
+                                                {(() => {
+                                                    const d = response.timestamp ? new Date(response.timestamp) : null;
+                                                    return d && !isNaN(d.getTime()) 
+                                                        ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                                                        : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                                })()}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
