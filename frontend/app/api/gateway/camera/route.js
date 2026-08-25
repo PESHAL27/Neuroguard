@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
+import { upsertLiveDevice } from "@/lib/deviceStore";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +14,20 @@ const WINDOW_MS = 3000; // 3 seconds window
 const THREATS_FILE = path.join(process.cwd(), "..", "backend", "data", "threats_data.json");
 const OVERRIDES_FILE = path.join(process.cwd(), "..", "backend", "data", "device_overrides.json");
 
-function getClientIp(req) {
+function getClientIp(req, body = {}) {
+    if (body?.ip && body.ip !== "::1") return body.ip;
+    if (body?.device_ip && body.device_ip !== "::1") return body.device_ip;
+    if (body?.source_ip && body.source_ip !== "::1") return body.source_ip;
+
     const forwarded = req.headers.get("x-forwarded-for");
     if (forwarded) {
-        return forwarded.split(",")[0].trim();
+        const ip = forwarded.split(",")[0].trim();
+        if (ip && ip !== "::1") return ip;
     }
     const realIp = req.headers.get("x-real-ip");
-    if (realIp) return realIp.trim();
-    return "10.185.191.199"; // Fallback demo attacker IP
+    if (realIp && realIp !== "::1") return realIp.trim();
+    
+    return "10.136.167.87";
 }
 
 function quarantineIp(ip, reason) {
@@ -33,6 +40,8 @@ function quarantineIp(ip, reason) {
         const devKey = `device_${ip.replace(/\./g, "_")}`;
         overrides[devKey] = {
             ip: ip,
+            name: "ESP32 Threat Node",
+            type: "esp32",
             blocked: true,
             trusted: false,
             surveillance: false,
@@ -48,8 +57,22 @@ function quarantineIp(ip, reason) {
         console.error("Failed to update overrides:", e);
     }
 
-    // 2. Add Windows Firewall Block Rule
-    if (ip && !ip.startsWith("127.") && !ip.startsWith("192.168.31.173") && !ip.startsWith("10.185.191.56")) {
+    // 2. Update live device store
+    upsertLiveDevice({
+        device_id: `device_${ip.replace(/\./g, "_")}`,
+        name: "ESP32 Threat Node",
+        ip: ip,
+        type: "esp32",
+        vendor: "Espressif Systems",
+        status: "blocked",
+        connected: false,
+        blocked: true,
+        trusted: false,
+        threat_count: 1,
+    });
+
+    // 3. Add Windows Firewall Block Rule
+    if (ip && !ip.startsWith("127.") && !ip.startsWith("192.168.31.173") && !ip.startsWith("10.136.167.56")) {
         exec(`netsh advfirewall firewall add rule name="NeuroGuard_Block_${ip}" dir=in action=block remoteip=${ip}`, () => {});
         exec(`netsh advfirewall firewall add rule name="NeuroGuard_Block_${ip}" dir=out action=block remoteip=${ip}`, () => {});
     }
@@ -72,7 +95,7 @@ function recordThreatEvent(sourceIp, requestCount) {
             source_ip: sourceIp,
             source_country: "Local IoT Mesh",
             target_device: "ESP32 OV2640 Camera Node",
-            target_ip: "10.185.191.90",
+            target_ip: "10.136.167.87",
             description: `Attacking ESP32 sent ${requestCount} rapid packets in < 3s, exceeding safety baseline (threshold: 5 msgs). Target ESP32 Camera protected.`,
             mitre_tactic: "Impact (TA0040)",
             mitre_id: "T1498.001",
@@ -101,23 +124,48 @@ export async function GET(req) {
 }
 
 async function handleGatewayTraffic(req) {
-    const clientIp = getClientIp(req);
+    let body = {};
+    try {
+        if (req.method === "POST") {
+            body = await req.json().catch(() => ({}));
+        }
+    } catch (e) {}
+
+    const clientIp = getClientIp(req, body);
     const now = Date.now();
 
+    // Ensure Target ESP32 Camera Node is registered in live device store
+    upsertLiveDevice({
+        device_id: "device_esp32_camera_node",
+        name: "ESP32 OV2640 Camera Node",
+        ip: "10.136.167.87",
+        type: "camera",
+        vendor: "Espressif Systems",
+        status: "connected",
+        connected: true,
+        trusted: true,
+        blocked: false,
+    });
+
     // Check if client is already quarantined
+    let isQuarantined = false;
     try {
         if (fs.existsSync(OVERRIDES_FILE)) {
             const overrides = JSON.parse(fs.readFileSync(OVERRIDES_FILE, "utf-8"));
             if (overrides[clientIp]?.blocked || overrides[`device_${clientIp.replace(/\./g, "_")}`]?.blocked) {
-                return NextResponse.json({
-                    status: "quarantined",
-                    error: "Access Denied: This node has been quarantined by NeuroGuard AI.",
-                    source_ip: clientIp,
-                    action: "blocked"
-                }, { status: 403 });
+                isQuarantined = true;
             }
         }
     } catch (e) {}
+
+    if (isQuarantined) {
+        return NextResponse.json({
+            status: "quarantined",
+            error: "Access Denied: This node has been quarantined by NeuroGuard AI.",
+            source_ip: clientIp,
+            action: "blocked"
+        }, { status: 403 });
+    }
 
     // Track request frequency
     const timestamps = requestTracker.get(clientIp) || [];
@@ -145,7 +193,21 @@ async function handleGatewayTraffic(req) {
         }, { status: 403 });
     }
 
-    // Normal safe packet (<= 5 msgs): Safe Forwarding
+    // Normal safe packet (<= 5 msgs): Register ESP32 node as healthy connected device
+    const deviceName = body?.device || "ESP32 Threat Node";
+    upsertLiveDevice({
+        device_id: `device_${clientIp.replace(/\./g, "_")}`,
+        name: deviceName,
+        ip: clientIp,
+        type: "esp32",
+        vendor: "Espressif Systems",
+        status: "connected",
+        connected: true,
+        trusted: true,
+        blocked: false,
+    });
+
+    // Safe Forwarding
     return NextResponse.json({
         status: "success",
         message: "Packet verified and forwarded to ESP32 Camera.",
@@ -155,3 +217,4 @@ async function handleGatewayTraffic(req) {
         camera_status: "protected"
     }, { status: 200 });
 }
+
