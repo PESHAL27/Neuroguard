@@ -52,41 +52,120 @@ def scan_network():
     }
 
 
-def block_ip(ip_address: str):
+def block_ip(ip_address: str, reason: str = "Threat response protocol initiated"):
     """
-    Executes actual iptables firewall IP blocking mechanism and logs the autonomous action to MongoDB.
+    Executes actual firewall IP blocking (netsh on Windows, iptables on Linux)
+    and updates device overrides and database to isolate the device.
     """
     print(f"Executing Firewall Rule: BLOCK {ip_address}")
+    import sys
+    import json
+    from pathlib import Path
     
-    # Actually block the IP using iptables
-    try:
-        subprocess.run(["iptables", "-A", "INPUT", "-s", ip_address, "-j", "DROP"], check=True)
-        subprocess.run(["iptables", "-A", "FORWARD", "-s", ip_address, "-j", "DROP"], check=True)
-        print(f"✅ Successfully added iptables DROP rules for {ip_address}")
-    except Exception as e:
-        print(f"❌ Failed to execute iptables for {ip_address}: {e}")
+    # 1. Native OS Firewall Block
+    if sys.platform == "win32":
+        try:
+            # Add Windows Defender Firewall rule
+            rule_name = f"NeuroGuard_Block_{ip_address.replace('.', '_')}"
+            subprocess.run(
+                ["netsh", "advfirewall", "firewall", "add", "rule", f"name={rule_name}", "dir=in", "action=block", f"remoteip={ip_address}"],
+                capture_output=True,
+                check=False
+            )
+            print(f"✅ Successfully added Windows Firewall rule for {ip_address}")
+        except Exception as e:
+            print(f"Windows Firewall warning: {e}")
+    else:
+        try:
+            subprocess.run(["iptables", "-A", "INPUT", "-s", ip_address, "-j", "DROP"], check=True)
+            subprocess.run(["iptables", "-A", "FORWARD", "-s", ip_address, "-j", "DROP"], check=True)
+            print(f"✅ Successfully added iptables DROP rules for {ip_address}")
+        except Exception as e:
+            print(f"❌ Failed to execute iptables for {ip_address}: {e}")
 
+    timestamp = datetime.utcnow().isoformat()
+    dev_id = f"device_{ip_address.replace('.', '_')}"
+
+    # 2. Update device_overrides.json & live_devices.json
+    try:
+        data_dir = Path(__file__).resolve().parent.parent / "data"
+        overrides_file = data_dir / "device_overrides.json"
+        live_file = data_dir / "live_devices.json"
+
+        overrides = {}
+        if overrides_file.exists():
+            try:
+                with open(overrides_file, "r", encoding="utf-8") as f:
+                    overrides = json.load(f)
+            except Exception:
+                overrides = {}
+
+        # Find key in overrides or create new
+        match_key = None
+        for k, v in overrides.items():
+            if v.get("ip") == ip_address or k == dev_id or k == f"dev_{dev_id}":
+                match_key = k
+                break
+        if not match_key:
+            match_key = dev_id
+
+        existing = overrides.get(match_key, {})
+        overrides[match_key] = {
+            **existing,
+            "device_id": match_key,
+            "ip": ip_address,
+            "name": existing.get("name") or f"Device ({ip_address})",
+            "blocked": True,
+            "connected": False,
+            "monitor": False,
+            "status": "blocked",
+            "quarantined_at": timestamp,
+            "blocked_reason": reason,
+            "last_seen": timestamp,
+        }
+
+        with open(overrides_file, "w", encoding="utf-8") as f:
+            json.dump(overrides, f, indent=2)
+
+        if live_file.exists():
+            try:
+                with open(live_file, "r", encoding="utf-8") as f:
+                    live_devs = json.load(f)
+                for d in live_devs:
+                    if d.get("ip") == ip_address or d.get("device_id") == match_key:
+                        d["blocked"] = True
+                        d["connected"] = False
+                        d["status"] = "blocked"
+                        d["quarantined_at"] = timestamp
+                with open(live_file, "w", encoding="utf-8") as f:
+                    json.dump(live_devs, f, indent=2)
+            except Exception:
+                pass
+    except Exception as e:
+        print(f"Error updating device overrides: {e}")
+
+    # 3. Update MongoDB
     if sync_db is not None:
-        timestamp = datetime.utcnow().isoformat()
-        
-        
-        
-        
-        # Log to blocked IPs
-        sync_db.blocked_ips.insert_one({
-            "ip": ip_address,
-            "reason": "Autonomous agent block",
-            "timestamp": timestamp
-        })
-        
-        # Log AI action
-        sync_db.ai_actions.insert_one({
-            "action": "block_ip",
-            "ip": ip_address,
-            "reason": "Threat response protocol initiated",
-            "timestamp": timestamp
-        })
-        
+        try:
+            sync_db.devices.update_many(
+                {"$or": [{"ip": ip_address}, {"device_id": dev_id}, {"device_id": f"dev_{dev_id}"}]},
+                {"$set": {"blocked": True, "connected": False, "status": "blocked", "quarantined_at": timestamp, "blocked_reason": reason}}
+            )
+            sync_db.blocked_ips.insert_one({
+                "ip": ip_address,
+                "reason": reason,
+                "timestamp": timestamp
+            })
+            sync_db.ai_actions.insert_one({
+                "action": "block_ip",
+                "ip": ip_address,
+                "reason": reason,
+                "timestamp": timestamp,
+                "status": "completed"
+            })
+        except Exception as e:
+            print(f"DB log error: {e}")
+
     return {
         "status": "success",
         "message": f"Firewall updated. Source IP {ip_address} has been permanently blocked across all subnets."

@@ -1,5 +1,199 @@
 [
   {
+    "id": "RPT-2026-0826-2938",
+    "name": "Weekly Executive Summary",
+    "created": "2026-08-26T11:36:26.044319",
+    "timeRange": "Weekly",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 7,
+      "blockedIPs": 2,
+      "devicesMonitored": 5,
+      "criticalIncidents": 0,
+      "complianceScore": 98
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 7,
+        "percentage": 100,
+        "color": "amber",
+        "hex": "#FBBF24"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "192.168.31.173",
+        "type": "Endpoint",
+        "hits": 7
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "159.41.192.55",
+        "country": "KR",
+        "hits": 6,
+        "trend": "up"
+      },
+      {
+        "ip": "192.168.31.1",
+        "country": "NL",
+        "hits": 1,
+        "trend": "up"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "4.8 GB",
+      "dataUsage": {
+        "in": "3.1 GB",
+        "out": "1.7 GB"
+      },
+      "connections": "1.24K",
+      "suspicious": 3,
+      "heatMapData": [
+        20,
+        35,
+        10,
+        80,
+        45,
+        90,
+        60,
+        30,
+        75,
+        40,
+        95,
+        15,
+        65,
+        85,
+        25,
+        50,
+        70,
+        30,
+        45,
+        80,
+        10,
+        20,
+        35,
+        10,
+        80,
+        45,
+        90,
+        60,
+        30,
+        75,
+        40,
+        95,
+        15,
+        65,
+        85,
+        25,
+        50,
+        70,
+        30,
+        45,
+        80,
+        10
+      ]
+    },
+    "deviceSummary": {
+      "total": 5,
+      "healthy": 0,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 5
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 7 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 0%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 0 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "11:35:53",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High-severity port scan detected from external IP 159.41.192.55 targeting internal IoT device 192.168.31.173. Threat score of 85 indicates active reconnaissance, likely preceding a more severe attack. Immediate blocking is required."
+      },
+      {
+        "time": "11:34:25",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.31.1 \u2014 High-severity port scan detected from source IP 192.168.31.1 targeting device 192.168.31.173. Threat score is 85 out of 100, indicating a high-confidence reconnaissance attack. Port scanning is a precursor to exploitation and must be blocked immediately."
+      },
+      {
+        "time": "11:33:51",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "11:31:51",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "11:29:47",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High-severity port scan detected from external IP 159.41.192.55 targeting internal IoT device 192.168.31.173. Threat score of 85 indicates aggressive reconnaissance activity, likely preceding further exploitation attempts. Immediate blocking is required to protect the internal network."
+      },
+      {
+        "time": "11:27:47",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High-severity port scan detected from source IP 159.41.192.55 targeting internal IoT device 192.168.31.173. Threat score of 85 indicates active reconnaissance, likely preceding further exploitation attempts. Immediate blocking is required to protect the internal network."
+      },
+      {
+        "time": "11:25:46",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High-severity port scan (threat score 85) from external IP 159.41.192.55 targeting IoT device 192.168.31.173. Active reconnaissance likely precedes exploitation."
+      },
+      {
+        "time": "11:23:45",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 Port scan with high severity and threat score of 85 targeting an internal IoT device. Reconnaissance activity of this nature poses imminent risk of follow-up attacks."
+      },
+      {
+        "time": "11:21:45",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.55 \u2014 High severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "11:20:40",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 49.44.106.5 \u2014 Source IP 49.44.106.5 is conducting a port scan against internal IoT device 192.168.31.173. Threat score is 85 with high severity, indicating active reconnaissance that could precede exploitation. Blocking is required to prevent further network probing and potential lateral movement."
+      },
+      {
+        "time": "11:20:36",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.84 \u2014 Port scan detected from source IP 159.41.192.84 targeting internal IoT device 192.168.31.173. Threat score is 85 with high severity, indicating an active reconnaissance attempt against the network."
+      },
+      {
+        "time": "11:20:30",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 159.41.192.41 \u2014 High severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "5.3 KB"
+  },
+  {
     "id": "RPT-2026-0824-9016",
     "name": "Weekly Executive Summary",
     "created": "2026-08-24T14:55:02.175170",

@@ -22,9 +22,6 @@ export const getApiBaseCandidates = () => {
         candidates.push(envUrl);
     }
 
-    // Include relative origin for Next.js internal API routes
-    candidates.push("");
-
     candidates.push(`http://${hostname}:8000`);
 
     if (hostname !== "localhost") {
@@ -34,6 +31,9 @@ export const getApiBaseCandidates = () => {
     if (hostname !== "127.0.0.1") {
         candidates.push("http://127.0.0.1:8000");
     }
+
+    // Include relative origin for Next.js internal API routes
+    candidates.push("");
 
     return [...new Set(candidates)];
 };

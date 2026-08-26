@@ -1,7 +1,7 @@
 {
-  "local_ip": "10.136.167.56",
-  "gateway_ip": "10.136.167.162",
-  "local_24_prefix": "10.136.167.",
-  "subnet_cidr": "10.136.167.0/24",
+  "local_ip": "192.168.31.173",
+  "gateway_ip": "192.168.31.1",
+  "local_24_prefix": "192.168.31.",
+  "subnet_cidr": "192.168.31.0/24",
   "interface": "Wi-Fi / Ethernet"
 }

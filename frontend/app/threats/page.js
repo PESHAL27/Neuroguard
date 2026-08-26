@@ -73,10 +73,10 @@ export default function Threats() {
         const loadThreatData = async () => {
             try {
                 const [nextThreats, nextMetrics, nextActions, nextLocations] = await Promise.all([
-                    fetch("/api/threats", { cache: "no-store" }).then(r => r.ok ? r.json() : []).catch(() => []),
-                    fetch("/api/metrics", { cache: "no-store" }).then(r => r.ok ? r.json() : null).catch(() => null),
-                    fetch("/api/actions", { cache: "no-store" }).then(r => r.ok ? r.json() : []).catch(() => []),
-                    fetch("/api/threat-locations", { cache: "no-store" }).then(r => r.ok ? r.json() : []).catch(() => []),
+                    fetchApiJson("/api/threats", { cache: "no-store" }).catch(() => []),
+                    fetchApiJson("/api/metrics", { cache: "no-store" }).catch(() => null),
+                    fetchApiJson("/api/actions", { cache: "no-store" }).catch(() => []),
+                    fetchApiJson("/api/threat-locations", { cache: "no-store" }).catch(() => []),
                 ]);
 
                 const validThreats = Array.isArray(nextThreats) ? nextThreats : [];
