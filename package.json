@@ -1,4 +1,11 @@
 {
+  "name": "neuroguard-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start"
+  },
   "dependencies": {
     "lodash": "^4.17.23"
   }
