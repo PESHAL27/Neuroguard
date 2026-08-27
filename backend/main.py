@@ -25,6 +25,8 @@ import asyncio
 import random
 import psutil
 import time
+import json
+from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, List
 from db import db
 from datetime import datetime, timedelta
@@ -122,15 +124,24 @@ async def _load_device_lookup() -> Dict[str, Dict[str, Any]]:
         device_id = device.get("device_id")
         if device_id:
             lookup[device_id] = device
+        ip = device.get("ip")
+        if ip:
+            lookup[ip] = device
     return lookup
 
 
 async def _load_monitorable_device_ids() -> List[str]:
     connected_devices = await db.devices.find(
         {"connected": True, "monitor": True, "blocked": {"$ne": True}},
-        {"device_id": 1},
+        {"device_id": 1, "ip": 1},
     ).to_list(500)
-    return [device.get("device_id") for device in connected_devices if device.get("device_id")]
+    ids = []
+    for device in connected_devices:
+        if device.get("device_id"):
+            ids.append(device["device_id"])
+        if device.get("ip"):
+            ids.append(device["ip"])
+    return ids
 
 
 def _build_threat_filter(connected_only: bool, monitorable_device_ids: List[str]) -> Dict[str, Any]:
@@ -141,6 +152,7 @@ def _build_threat_filter(connected_only: bool, monitorable_device_ids: List[str]
     return {
         "$or": [
             {"targetDevice": {"$in": monitorable_device_ids}},
+            {"target_device": {"$in": monitorable_device_ids}},
             {"device": {"$in": monitorable_device_ids}},
         ]
     }
@@ -209,12 +221,13 @@ def _build_ai_summary(document: Dict[str, Any], severity: str, normalized_type: 
 
 def _serialize_threat(document: Dict[str, Any], device_lookup: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     source_ip = document.get("sourceIp") or document.get("source_ip") or "unknown"
-    target_device_id = document.get("targetDevice") or document.get("device") or document.get("target") or "unknown-target"
+    target_device_id = document.get("targetDevice") or document.get("target_device") or document.get("device") or document.get("target") or "unknown-target"
     target_device = device_lookup.get(target_device_id, {})
     target_name = (
         document.get("target")
         or target_device.get("name")
         or document.get("targetDevice")
+        or document.get("target_device")
         or document.get("device")
         or "Unknown Target"
     )
@@ -348,15 +361,40 @@ async def load_all_devices():
         _serialize_cursor(db.devices.find({}), "devices"),
         _serialize_cursor(db.unknown_devices.find({}), "unknown_devices"),
     )
-    devices_list = known_devices + unknown_devices
-    devices_list.sort(
+    
+    seen_keys = set()
+    merged = []
+    
+    for d in known_devices + unknown_devices:
+        key = d.get("ip") or d.get("mac") or d.get("device_id")
+        if key:
+            seen_keys.add(key)
+        merged.append(d)
+        
+    # Merge dynamically scanned devices from live_devices.json
+    live_file = Path(__file__).resolve().parent / "data" / "live_devices.json"
+    if live_file.exists():
+        try:
+            with open(live_file, "r", encoding="utf-8") as f:
+                scanned_list = json.load(f)
+                if isinstance(scanned_list, list):
+                    for raw_dev in scanned_list:
+                        key = raw_dev.get("ip") or raw_dev.get("mac") or raw_dev.get("device_id")
+                        if key and key not in seen_keys:
+                            seen_keys.add(key)
+                            normalized = normalize_device_document(raw_dev, "unknown_devices")
+                            merged.append(normalized)
+        except Exception:
+            pass
+
+    merged.sort(
         key=lambda device: (
             0 if device.get("blocked") else 1,
             0 if device.get("connected") else 1,
             device.get("name", ""),
         )
     )
-    return devices_list
+    return merged
 
 
 async def find_device_record(device_id: Optional[str] = None, ip: Optional[str] = None, mac: Optional[str] = None) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
@@ -511,6 +549,13 @@ async def startup_event():
     # Start dynamic multi-subnet live scanner background thread
     start_scanner_background()
 
+    # Start hardware network monitor sniffer in background
+    try:
+        from detection.network_monitor import start_network_monitor_thread
+        start_network_monitor_thread()
+    except Exception as ne:
+        print("Hardware network monitor startup note:", ne)
+
 # Setup CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
@@ -521,6 +566,7 @@ app.add_middleware(
 )
 
 @app.get("/api/scan/network-info")
+@app.get("/api/network/info")
 async def get_network_info_api():
     """Returns current active interface, local IP, gateway, and subnet CIDR."""
     return get_active_network_details()
@@ -541,22 +587,79 @@ class ThreatDetectionRequest(BaseModel):
 
 @app.post("/api/threats/detect")
 async def detect_threat(req: ThreatDetectionRequest):
+    timestamp = datetime.utcnow().isoformat()
     threat_doc = req.model_dump()
-    threat_doc["timestamp"] = datetime.utcnow().isoformat()
+    threat_doc["timestamp"] = timestamp
     threat_doc["status"] = "Active"
+    threat_doc["targetDevice"] = req.target_device
+    threat_doc["sourceIp"] = req.source_ip
+    threat_doc["type"] = req.attack_type
+    threat_doc["threatScore"] = req.threat_score
     
-    # Store directly in DB Collections to be picked up by frontend
     if db is not None:
+        # 1. Resolve Target Device name/id if target is an IP
+        target_dev = await db.devices.find_one({"$or": [{"ip": req.target_device}, {"device_id": req.target_device}]})
+        if target_dev:
+            threat_doc["targetDevice"] = target_dev.get("device_id") or req.target_device
+            threat_doc["target"] = target_dev.get("name") or req.target_device
+        else:
+            threat_doc["target"] = req.target_device
+
+        # 2. Store threat in DB
         await db.threats.insert_one(threat_doc)
+
+        # 3. Automatically register and BLOCK the attacker device
+        src_ip = req.source_ip
+        existing_attacker = await db.devices.find_one({"ip": src_ip}) or await db.unknown_devices.find_one({"ip": src_ip})
         
-        # Dispatch alert using agent pipelines
+        attacker_id = (
+            existing_attacker.get("device_id") 
+            if existing_attacker and existing_attacker.get("device_id") 
+            else f"device_{src_ip.replace('.', '_')}"
+        )
+        attacker_name = (
+            existing_attacker.get("name") 
+            if existing_attacker and existing_attacker.get("name") 
+            else f"Attacker ESP32 ({src_ip})"
+        )
+
+        attacker_doc = {
+            "device_id": attacker_id,
+            "name": attacker_name,
+            "ip": src_ip,
+            "mac": existing_attacker.get("mac", "unknown") if existing_attacker else "unknown",
+            "type": "esp32",
+            "status": "blocked",
+            "connected": False,
+            "monitor": False,
+            "blocked": True,
+            "blocked_at": timestamp,
+            "blocked_reason": f"Automatic Quarantine: {req.attack_type.replace('_', ' ').title()} - {req.description}",
+            "last_seen": timestamp,
+        }
+
+        # Upsert into blocked devices list
+        await db.devices.update_one(
+            {"$or": [{"ip": src_ip}, {"device_id": attacker_id}]},
+            {"$set": attacker_doc},
+            upsert=True
+        )
+        await db.unknown_devices.delete_many({"$or": [{"ip": src_ip}, {"device_id": attacker_id}]})
+        await db.blocked_ips.update_one(
+            {"ip": src_ip},
+            {"$set": {"ip": src_ip, "timestamp": timestamp, "reason": req.description}},
+            upsert=True
+        )
+
+        # 4. Dispatch alert using agent pipelines & auto-response
         try:
             from agent.timeline_engine import record_event
-            await record_event("THREAT_DETECTED", req.description, req.severity, req.target_device)
+            await record_event("THREAT_DETECTED", req.description, req.severity, threat_doc["targetDevice"])
+            await _auto_respond_to_threat(threat_doc, src_ip, timestamp)
         except Exception as e:
-            print("Event record failed:", e)
+            print("Event record / auto-response failed:", e)
             
-    return {"status": "success"}
+    return {"status": "success", "attacker_blocked": True, "source_ip": req.source_ip}
 
 class CommandRequest(BaseModel):
     command: str

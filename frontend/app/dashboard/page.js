@@ -18,6 +18,7 @@ import { fetchApi } from "@/lib/api";
 export default function Dashboard() {
     const [mounted, setMounted] = useState(false);
     const [activeIncident, setActiveIncident] = useState(null);
+    const [isResetting, setIsResetting] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -28,8 +29,12 @@ export default function Dashboard() {
                 if (res.ok) {
                     const threats = await res.json();
                     if (Array.isArray(threats)) {
-                        const critical = threats.find(t => t.severity === "critical" && t.status === "active");
-                        setActiveIncident(critical || null);
+                        const active = threats.find(t => {
+                            const sev = (t.severity || "").toLowerCase();
+                            const stat = (t.status || "").toLowerCase();
+                            return (sev === "critical" || sev === "high") && (stat === "active" || !t.resolved);
+                        });
+                        setActiveIncident(active || null);
                     }
                 }
             } catch (e) {}
@@ -67,17 +72,39 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center gap-3">
                             <button
+                                id="btn-fresh-reset"
+                                disabled={isResetting}
                                 onClick={async () => {
-                                    if (confirm("Reset threat records and clear active alarms?")) {
-                                        try {
-                                            await fetch("/api/clear-history", { method: "POST" });
-                                            setActiveIncident(null);
-                                        } catch (e) {}
+                                    setIsResetting(true);
+                                    try {
+                                        await fetch("/api/clear-history", { method: "POST" });
+                                        setActiveIncident(null);
+                                        // Brief delay to allow backend wipe, then reload
+                                        setTimeout(() => {
+                                            window.location.reload();
+                                        }, 400);
+                                    } catch (e) {
+                                        setIsResetting(false);
                                     }
                                 }}
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-rose-600/20 hover:bg-rose-600/30 transition-colors border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)] cursor-pointer"
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 border cursor-pointer ${
+                                    isResetting 
+                                        ? "bg-amber-500/20 border-amber-500/40 text-amber-300" 
+                                        : "bg-rose-500/15 hover:bg-rose-500/25 border-rose-500/30 text-rose-300 hover:shadow-[0_0_20px_rgba(244,63,94,0.25)]"
+                                }`}
+                                title="Click to clear all threats and reset website to fresh clean state"
                             >
-                                <span className="text-[11px] text-rose-400 font-bold tracking-wider uppercase">🗑️ Reset Dashboard</span>
+                                <svg 
+                                    className={`w-4 h-4 ${isResetting ? "animate-spin text-amber-400" : "text-rose-400"}`} 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                <span className="text-xs font-semibold tracking-wide uppercase">
+                                    {isResetting ? "Resetting..." : "Fresh Start"}
+                                </span>
                             </button>
                             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

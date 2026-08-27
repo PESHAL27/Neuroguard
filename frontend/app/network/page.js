@@ -347,6 +347,8 @@ export default function NetworkPage() {
         avgLatency: 0,
     });
 
+    const lastTopologyHashRef = useRef("");
+
     const fetchTopologyData = async () => {
         try {
             const data = await fetchApiJson("/api/network/topology");
@@ -370,7 +372,6 @@ export default function NetworkPage() {
                     x: node.x ?? (50 + 25 * Math.cos((idx / rawNodes.length) * 2 * Math.PI)),
                     y: node.y ?? (48 + 25 * Math.sin((idx / rawNodes.length) * 2 * Math.PI)),
                 }));
-                setNetworkDevices(nodes);
 
                 const links = rawLinks.map((link, idx) => ({
                     id: link.id || `link_${idx}`,
@@ -379,7 +380,13 @@ export default function NetworkPage() {
                     flows: link.flows || 1,
                     suspicious: Boolean(link.suspicious),
                 }));
-                setTopologyLinks(links);
+
+                const hash = JSON.stringify(nodes.map(n => [n.id, n.status, n.threatScore, n.ip])) + JSON.stringify(links.map(l => [l.id, l.suspicious, l.flows]));
+                if (hash !== lastTopologyHashRef.current) {
+                    lastTopologyHashRef.current = hash;
+                    setNetworkDevices(nodes);
+                    setTopologyLinks(links);
+                }
 
                 if (rawStats) {
                     setStats((prev) => ({
@@ -417,24 +424,17 @@ export default function NetworkPage() {
         }
     };
 
-    // Polling Topology + SSE Real-Time Stream
+    // Clean stable interval for topology sync (4s)
     useEffect(() => {
         fetchTopologyData();
         fetchNetworkInfo();
-        const interval = setInterval(fetchTopologyData, 1500);
-
-        let eventSource;
-        try {
-            eventSource = new EventSource("/api/devices/stream");
-            eventSource.onmessage = () => {
-                fetchTopologyData();
-                fetchNetworkInfo();
-            };
-        } catch (e) {}
+        const interval = setInterval(() => {
+            fetchTopologyData();
+            fetchNetworkInfo();
+        }, 4000);
 
         return () => {
             clearInterval(interval);
-            if (eventSource) eventSource.close();
         };
     }, []);
 

@@ -100,6 +100,48 @@ function saveThreats(threats) {
 }
 
 export async function GET(req) {
+    // 1. Try to fetch live threats from FastAPI backend
+    try {
+        const backendRes = await fetch("http://127.0.0.1:8000/api/threats?limit=100", { cache: "no-store" });
+        if (backendRes.ok) {
+            const liveThreats = await backendRes.json();
+            if (Array.isArray(liveThreats)) {
+                return NextResponse.json(liveThreats);
+            }
+        }
+    } catch (e) {
+        // Backend offline or unreachable, fallback
+    }
+
+    // 2. Try MongoDB Atlas direct connection
+    try {
+        const clientPromise = (await import("@/lib/mongodb")).default;
+        const client = await clientPromise;
+        const db = client.db(process.env.MONGODB_DB || "neurogaurd");
+        const dbThreats = await db.collection("threats").find({}).sort({ timestamp: -1 }).limit(100).toArray();
+        if (dbThreats && dbThreats.length > 0) {
+            const mapped = dbThreats.map(t => ({
+                id: t.id || String(t._id),
+                _id: String(t._id),
+                type: t.type || t.attack_type || "Threat Detected",
+                severity: (t.severity || "high").toLowerCase(),
+                status: t.status || "active",
+                source_ip: t.sourceIp || t.source_ip || "Unknown",
+                source_country: t.source_country || "Local Subnet",
+                target_device: t.targetDevice || t.target_device || t.device || "ESP32",
+                target_ip: t.target_ip || "192.168.137.1",
+                description: t.description || "Anomalous network activity detected",
+                threat_score: t.threatScore || t.threat_score || 85,
+                confidence_score: t.threatScore || t.threat_score || 85,
+                timestamp: t.timestamp || new Date().toISOString(),
+                mitigated: Boolean(t.resolved || t.status === "mitigated"),
+                action_taken: t.suggestedAction || "Quarantine Active"
+            }));
+            return NextResponse.json(mapped);
+        }
+    } catch (e) {}
+
+    // 3. Fallback to local stored mockup
     const threats = loadStoredThreats();
     return NextResponse.json(threats);
 }

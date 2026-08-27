@@ -1,33 +1,13 @@
 {
-  "device_192_168_31_173": {
-    "trusted": true,
-    "surveillance": false,
-    "status": "connected",
-    "surveillance_level": "High",
-    "surveillance_started": "2026-08-24T07:54:47.401Z",
-    "device_id": "device_192_168_31_173",
-    "ip": "192.168.31.173",
-    "name": "Admin Host PC (Your Device)",
-    "mac": "50:BB:B5:79:E7:18",
-    "last_seen": "2026-08-24T07:55:16.815Z",
-    "blocked": false,
-    "connected": true,
-    "monitor": true,
-    "quarantined_at": null,
-    "blocked_reason": null
-  },
-  "device_10_0_8_29": {
+  "device_159_41_192_41": {
     "blocked": false,
     "connected": true,
     "monitor": true,
     "status": "connected",
     "quarantined_at": null,
     "blocked_reason": null,
-    "device_id": "device_10_0_8_29",
-    "ip": "10.0.8.29",
-    "name": "Apple iPhone / Mac",
-    "mac": "7A:9B:40:5F:1E:16",
-    "last_seen": "2026-08-24T09:17:16.992Z"
+    "device_id": "device_159_41_192_41",
+    "last_seen": "2026-08-26T11:43:42.123Z"
   },
   "device_192_168_1_3": {
     "trusted": true,
@@ -43,6 +23,7 @@
     "blocked": false,
     "connected": true,
     "monitor": true,
+    "status": "connected",
     "quarantined_at": null,
     "blocked_reason": null
   },

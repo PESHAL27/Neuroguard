@@ -40,9 +40,6 @@ const getApiBaseCandidates = () => {
         candidates.push(envUrl);
     }
 
-    // Include relative origin for Next.js internal API routes
-    candidates.push("");
-
     candidates.push(`http://${hostname}:8000`);
 
     if (hostname !== "localhost") {
@@ -52,6 +49,9 @@ const getApiBaseCandidates = () => {
     if (hostname !== "127.0.0.1") {
         candidates.push("http://127.0.0.1:8000");
     }
+
+    // Include relative origin for Next.js internal API routes
+    candidates.push("");
 
     return [...new Set(candidates)];
 };
@@ -249,53 +249,22 @@ export default function Devices() {
 
         loadDevices();
         loadStats();
-        // Stable polling interval for smooth background sync
-        pollTimer = setInterval(loadDevices, 2000);
-        statsTimer = setInterval(loadStats, 6000);
-
-        // SSE Real-time Live Network Stream
-        try {
-            eventSource = new EventSource("/api/devices/stream");
-            eventSource.onopen = () => {
-                setConnectionMode("live_stream");
-            };
-            eventSource.onmessage = (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-                    updateDevicesState(data);
-                } catch (e) {}
-            };
-            eventSource.onerror = () => {
-                setConnectionMode("polling");
-            };
-        } catch (e) {
-            setConnectionMode("polling");
-        }
+        // Clean stable polling interval (3s) for smooth background sync
+        pollTimer = setInterval(loadDevices, 3000);
+        statsTimer = setInterval(loadStats, 8000);
 
         return () => {
             clearInterval(pollTimer);
             clearInterval(statsTimer);
-            if (eventSource) eventSource.close();
         };
     }, []);
 
     // Handle URL parameter filtering (when navigated from other pages)
     useEffect(() => {
         if (filterParam) {
-            // Auto-filter devices based on URL parameter
-            const matchingDevice = devices.find(d => 
-                d.name?.toLowerCase().includes(filterParam.toLowerCase()) ||
-                d.hostname?.toLowerCase().includes(filterParam.toLowerCase()) ||
-                d.ip === filterParam
-            );
-            if (matchingDevice) {
-                // Temporarily highlight the device by setting a special filter
-                setFilter(`highlight:${filterParam}`);
-                // Reset to "all" after 3 seconds
-                setTimeout(() => setFilter("all"), 3000);
-            }
+            setFilter(`highlight:${filterParam}`);
         }
-    }, [filterParam, devices]);
+    }, [filterParam]);
 
     // Fetch images when a new device type is seen
     useEffect(() => {

@@ -52,7 +52,7 @@ def scan_network():
     }
 
 
-def block_ip(ip_address: str):
+def block_ip(ip_address: str, reason: str = "Threat response protocol initiated"):
     """
     Executes real-time kernel-level IP blocking via Windows Firewall + Routing Blackhole
     (or Linux iptables) and logs the action to database.

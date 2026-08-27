@@ -150,3 +150,74 @@ export function updateDevice(deviceId, updates) {
         ...updated
     };
 }
+
+export function upsertLiveDevice(deviceData) {
+    if (!deviceData) return null;
+    const { liveScan } = getPaths();
+    let devices = [];
+    if (fs.existsSync(liveScan)) {
+        try {
+            const parsed = JSON.parse(fs.readFileSync(liveScan, "utf8"));
+            if (Array.isArray(parsed)) devices = parsed;
+        } catch (e) {}
+    }
+
+    const devId = deviceData.device_id || deviceData._id || (deviceData.ip ? `device_${deviceData.ip.replace(/\./g, "_")}` : `device_${Date.now()}`);
+    const ip = deviceData.ip || "N/A";
+    const mac = deviceData.mac || "DYNAMIC-ESP32";
+    const lastOctet = ip.split('.').pop() || "node";
+
+    const defaultName = (deviceData.type === "esp32" || (deviceData.name && deviceData.name.toLowerCase().includes("esp32")))
+        ? (deviceData.name || `ESP32 IoT Node (${lastOctet})`)
+        : (deviceData.name || `Connected Device (${lastOctet})`);
+
+    const existingIndex = devices.findIndex(d => 
+        (d.device_id && d.device_id === devId) ||
+        (d.ip && d.ip !== "N/A" && d.ip === ip) ||
+        (d.mac && d.mac !== "DYNAMIC-ESP32" && d.mac === mac)
+    );
+
+    const now = new Date().toISOString();
+    const updatedEntry = {
+        _id: `dev_${devId}`,
+        device_id: devId,
+        name: deviceData.name || (existingIndex >= 0 ? devices[existingIndex].name : defaultName),
+        hostname: deviceData.hostname || (existingIndex >= 0 ? devices[existingIndex].hostname : `esp32-${lastOctet}.lan`),
+        ip: ip,
+        mac: mac,
+        type: deviceData.type || (existingIndex >= 0 ? devices[existingIndex].type : "esp32"),
+        type_guess: deviceData.type || "esp32",
+        vendor: deviceData.vendor || "Espressif Systems",
+        status: deviceData.status || "connected",
+        connected: deviceData.connected !== undefined ? deviceData.connected : true,
+        trusted: deviceData.trusted !== undefined ? deviceData.trusted : true,
+        surveillance: deviceData.surveillance || false,
+        blocked: deviceData.blocked || false,
+        threat_count: deviceData.threat_count || 0,
+        latency_ms: deviceData.latency_ms || 12,
+        network_usage: deviceData.network_usage || 450,
+        connections: deviceData.connections || 2,
+        cpu: deviceData.cpu || 20,
+        last_seen: now,
+        subnet: deviceData.subnet || "10.136.167.0/24",
+        interface: deviceData.interface || "Wi-Fi / Ethernet",
+        sensors: deviceData.sensors || (existingIndex >= 0 ? devices[existingIndex].sensors : undefined),
+        actuators: deviceData.actuators || (existingIndex >= 0 ? devices[existingIndex].actuators : undefined),
+        peripherals: deviceData.peripherals || (existingIndex >= 0 ? devices[existingIndex].peripherals : undefined),
+    };
+
+    if (existingIndex >= 0) {
+        devices[existingIndex] = { ...devices[existingIndex], ...updatedEntry };
+    } else {
+        devices.push(updatedEntry);
+    }
+
+    try {
+        fs.writeFileSync(liveScan, JSON.stringify(devices, null, 2), "utf8");
+    } catch (e) {
+        console.error("Error writing live_devices.json:", e.message);
+    }
+
+    return updatedEntry;
+}
+

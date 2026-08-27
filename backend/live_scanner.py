@@ -42,38 +42,97 @@ except Exception:
 
 # Hardware OUI Vendor Signatures
 MAC_VENDORS = {
-    # Espressif ESP32 / ESP8266
-    "24:6F:28": ("Espressif ESP32 IoT Node", "esp32"),
-    "30:AE:A4": ("Espressif ESP32 IoT Node", "esp32"),
-    "7C:DF:A1": ("Espressif ESP8266 Wi-Fi Module", "esp32"),
-    "AC:67:B2": ("Espressif ESP32-S3 Microcontroller", "esp32"),
-    "84:CC:A8": ("Espressif ESP32 Sensor Node", "esp32"),
-    "A4:CF:12": ("Espressif ESP32 Controller", "esp32"),
+    # Espressif Systems ESP32 / ESP8266 / ESP32-S / ESP32-C / ESP32-H
     "24:0A:C4": ("Espressif ESP32 IoT Node", "esp32"),
+    "24:4C:AB": ("Espressif ESP32 Node", "esp32"),
+    "24:58:7C": ("Espressif ESP32 Node", "esp32"),
+    "24:62:AB": ("Espressif ESP32 Node", "esp32"),
+    "24:6F:28": ("Espressif ESP32 IoT Node", "esp32"),
+    "24:D7:EB": ("Espressif ESP32 Node", "esp32"),
+    "24:DC:C3": ("Espressif ESP32 Node", "esp32"),
     "30:83:98": ("Espressif ESP32 IoT Node", "esp32"),
+    "30:AE:A4": ("Espressif ESP32 IoT Node", "esp32"),
+    "30:C6:F7": ("Espressif ESP32 Node", "esp32"),
+    "30:ED:A0": ("Espressif ESP32 Node", "esp32"),
+    "3C:61:05": ("Espressif ESP32 Node", "esp32"),
+    "3C:71:BF": ("Espressif ESP32 Node", "esp32"),
+    "3C:8A:1F": ("Espressif ESP32 IoT Node", "esp32"),
     "40:22:D8": ("Espressif ESP32-C3 Node", "esp32"),
+    "40:4C:CA": ("Espressif ESP32 Node", "esp32"),
     "40:91:51": ("Espressif ESP32-C3 Node", "esp32"),
+    "48:27:E2": ("Espressif ESP32 Node", "esp32"),
+    "48:31:B7": ("Espressif ESP32 Node", "esp32"),
     "48:55:19": ("Espressif ESP32 IoT Device", "esp32"),
+    "48:CA:43": ("Espressif ESP32 Node", "esp32"),
+    "4C:11:AE": ("Espressif ESP32 Node", "esp32"),
+    "4C:75:25": ("Espressif ESP32 Node", "esp32"),
+    "50:02:91": ("Espressif ESP32 Node", "esp32"),
     "54:43:B2": ("Espressif ESP32 IoT Device", "esp32"),
+    "54:5A:A6": ("Espressif ESP32 Node", "esp32"),
+    "60:55:F9": ("Espressif ESP32 Node", "esp32"),
     "68:67:25": ("Espressif ESP32 IoT Device", "esp32"),
+    "68:B6:B3": ("Espressif ESP32 Node", "esp32"),
     "70:03:9F": ("Espressif ESP32 IoT Device", "esp32"),
+    "70:04:1D": ("Espressif ESP32 Node", "esp32"),
+    "70:B8:F6": ("Espressif ESP32 Node", "esp32"),
+    "78:21:84": ("Espressif ESP32 Node", "esp32"),
+    "78:E3:6D": ("Espressif ESP32 Node", "esp32"),
     "7C:87:CE": ("Espressif ESP32 IoT Device", "esp32"),
+    "7C:9E:BD": ("Espressif ESP32 Node", "esp32"),
+    "7C:DF:A1": ("Espressif ESP8266 Wi-Fi Module", "esp32"),
+    "80:65:99": ("Espressif ESP32 Node", "esp32"),
     "80:7D:3A": ("Espressif ESP32 IoT Device", "esp32"),
     "84:0D:8E": ("Espressif ESP32 IoT Device", "esp32"),
+    "84:CC:A8": ("Espressif ESP32 Sensor Node", "esp32"),
     "84:F3:EB": ("Espressif ESP8266 Wi-Fi Node", "esp32"),
     "90:38:0C": ("Espressif Systems ESP32", "esp32"),
+    "94:3C:C6": ("Espressif Systems ESP32", "esp32"),
+    "94:54:C5": ("Espressif Systems ESP32", "esp32"),
+    "94:B5:55": ("Espressif Systems ESP32", "esp32"),
     "94:B9:7E": ("Espressif Systems ESP32", "esp32"),
+    "98:CD:AC": ("Espressif Systems ESP32", "esp32"),
+    "98:F4:AB": ("Espressif Systems ESP32", "esp32"),
     "A0:20:A6": ("Espressif Systems ESP32", "esp32"),
+    "A0:76:4E": ("Espressif Systems ESP32", "esp32"),
+    "A0:B7:65": ("Espressif Systems ESP32", "esp32"),
+    "A4:C1:38": ("Espressif Systems ESP32", "esp32"),
+    "A4:CF:12": ("Espressif ESP32 Controller", "esp32"),
     "A4:E5:7C": ("Espressif ESP32-S3 Node", "esp32"),
+    "AC:0B:FB": ("Espressif Systems ESP32", "esp32"),
+    "AC:15:18": ("Espressif Systems ESP32", "esp32"),
+    "AC:67:B2": ("Espressif ESP32-S3 Microcontroller", "esp32"),
+    "B4:3A:45": ("Espressif Systems ESP32", "esp32"),
+    "B4:4E:26": ("Espressif Systems ESP32", "esp32"),
     "B4:E6:2D": ("Espressif Systems ESP32", "esp32"),
+    "B8:D6:1A": ("Espressif Systems ESP32", "esp32"),
     "BC:DD:C2": ("Espressif Systems ESP32", "esp32"),
+    "BC:FF:4D": ("Espressif Systems ESP32", "esp32"),
+    "C0:4E:30": ("Espressif Systems ESP32", "esp32"),
     "C4:4F:33": ("Espressif Systems ESP32", "esp32"),
+    "C4:D8:D5": ("Espressif Systems ESP32", "esp32"),
+    "C4:DD:57": ("Espressif Systems ESP32", "esp32"),
+    "C8:2E:18": ("Espressif Systems ESP32", "esp32"),
+    "C8:F0:9E": ("Espressif Systems ESP32", "esp32"),
     "CC:50:E3": ("Espressif Systems ESP32", "esp32"),
+    "CC:DB:A7": ("Espressif Systems ESP32", "esp32"),
+    "D8:A0:1D": ("Espressif Systems ESP32", "esp32"),
     "D8:BC:38": ("Espressif Systems ESP32", "esp32"),
+    "D8:BF:C0": ("Espressif Systems ESP32", "esp32"),
+    "DC:4F:22": ("Espressif Systems ESP32", "esp32"),
     "DC:54:75": ("Espressif Systems ESP32", "esp32"),
+    "E0:5A:1B": ("Espressif Systems ESP32", "esp32"),
     "E0:98:06": ("Espressif Systems ESP32", "esp32"),
+    "E8:31:CD": ("Espressif Systems ESP32", "esp32"),
+    "E8:6B:EA": ("Espressif Systems ESP32", "esp32"),
+    "E8:9F:6D": ("Espressif Systems ESP32", "esp32"),
     "E8:DB:84": ("Espressif Systems ESP32", "esp32"),
+    "EC:62:60": ("Espressif Systems ESP32", "esp32"),
+    "EC:64:C9": ("Espressif Systems ESP32", "esp32"),
+    "EC:94:CB": ("Espressif Systems ESP32", "esp32"),
     "EC:FA:BC": ("Espressif Systems ESP32", "esp32"),
+    "F0:08:D1": ("Espressif Systems ESP32", "esp32"),
+    "F0:F5:BD": ("Espressif Systems ESP32", "esp32"),
+    "F4:12:FA": ("Espressif Systems ESP32", "esp32"),
     "F4:CF:A2": ("Espressif Systems ESP32", "esp32"),
 
     # Raspberry Pi Foundation
@@ -299,10 +358,10 @@ def resolve_device_metadata(ip: str, mac: str, local_ip: str, gateway_ip: str) -
     hostname = discovered_host or f"node-{last_octet}.lan"
 
     # 2. Check for Specific Embedded IoT Platforms
-    if any(p in mac for p in ("24:6F:28", "30:AE:A4", "7C:DF:A1", "AC:67:B2", "84:CC:A8", "A4:CF:12", "24:0A:C4", "A4:E5:7C", "40:22:D8", "40:91:51")):
-        return f"ESP32 IoT Node ({last_octet})", "esp32", "Espressif Systems", hostname
-    if any(p in mac for p in ("B8:27:EB", "DC:A6:32", "E4:5F:01", "28:CD:C1", "D8:3A:DD")):
-        return f"Raspberry Pi ({last_octet})", "raspberry", "Raspberry Pi Foundation", hostname
+    if type_guess == "esp32" or (vendor_match and "espressif" in vendor_match.lower()) or any(p in mac for p in ("24:6F:28", "30:AE:A4", "7C:DF:A1", "AC:67:B2", "84:CC:A8", "A4:CF:12", "24:0A:C4", "A4:E5:7C", "40:22:D8", "40:91:51", "3C:8A:1F")):
+        return vendor_match or f"ESP32 IoT Node ({last_octet})", "esp32", "Espressif Systems", hostname
+    if type_guess == "raspberry" or (vendor_match and "raspberry" in vendor_match.lower()) or any(p in mac for p in ("B8:27:EB", "DC:A6:32", "E4:5F:01", "28:CD:C1", "D8:3A:DD")):
+        return vendor_match or f"Raspberry Pi ({last_octet})", "raspberry", "Raspberry Pi Foundation", hostname
 
     # 3. Check Hostname Signatures
     if discovered_host:
@@ -362,10 +421,21 @@ def resolve_device_metadata(ip: str, mac: str, local_ip: str, gateway_ip: str) -
 
 
 def probe_single_ip(ip: str) -> Tuple[str, Optional[str]]:
-    """Probes a single IP using SendARP, returns (ip, mac_or_none)."""
+    """Probes a single IP using SendARP and UDP wake-up, returns (ip, mac_or_none)."""
     ok, mac = send_arp_probe(ip)
     if ok and mac:
         return ip, mac
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(0.015)
+        sock.sendto(b"\x00", (ip, 80))
+        sock.close()
+        time.sleep(0.008)
+        ok, mac = send_arp_probe(ip)
+        if ok and mac:
+            return ip, mac
+    except Exception:
+        pass
     return ip, None
 
 
@@ -379,6 +449,18 @@ def perform_full_scan() -> List[Dict[str, Any]]:
     local_24_prefix = net_info["local_24_prefix"]
     subnet_cidr = net_info["subnet_cidr"]
     net_key = f"{local_ip}_{gateway_ip}"
+
+    # Load existing devices to preserve registered IoT nodes
+    existing_registered_esp = {}
+    if OUTPUT_FILE.exists():
+        try:
+            prev = json.loads(OUTPUT_FILE.read_text(encoding="utf-8"))
+            if isinstance(prev, list):
+                for d in prev:
+                    if d.get("type") in ("esp32", "camera", "sensor") and d.get("ip") and d["ip"] != "N/A":
+                        existing_registered_esp[d["ip"]] = d
+        except Exception:
+            pass
 
     # Handle Network Switch
     if net_key != current_network_key:
