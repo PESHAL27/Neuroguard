@@ -19,7 +19,7 @@
     "network_usage": 1200,
     "connections": 32,
     "cpu": 15,
-    "last_seen": "2026-08-27T08:09:21Z",
+    "last_seen": "2026-08-27T08:09:41Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
@@ -43,7 +43,7 @@
     "network_usage": 3500,
     "connections": 14,
     "cpu": 82,
-    "last_seen": "2026-08-27T08:09:21Z",
+    "last_seen": "2026-08-27T08:09:41Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
@@ -67,7 +67,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-27T08:09:21Z",
+    "last_seen": "2026-08-27T08:09:41Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   },
@@ -91,7 +91,7 @@
     "network_usage": 450,
     "connections": 4,
     "cpu": 25,
-    "last_seen": "2026-08-27T08:09:21Z",
+    "last_seen": "2026-08-27T08:09:41Z",
     "subnet": "192.168.1.0/24",
     "interface": "Wi-Fi / Ethernet"
   }
