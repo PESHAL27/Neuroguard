@@ -189,8 +189,8 @@ def packet_analyzer(packet):
     dq = target_packet_history[(client_ip, cam_ip)]
     dq.append(now)
 
-    # 1. Rapid Flood / Message Burst Detection (e.g. 5+ requests in 3.5s)
-    burst_count = sum(1 for t in dq if now - t <= 3.5)
+    # 1. Rapid Flood / Message Burst Detection (>= 5 messages in 8.0s)
+    burst_count = sum(1 for t in dq if now - t <= 8.0)
     if burst_count >= 5:
         trigger_threat_alert(
             attacker_ip=client_ip,
@@ -198,7 +198,7 @@ def packet_analyzer(packet):
             attack_type="DDoS / Message Flood",
             severity="Critical",
             score=10,
-            description=f"Rapid intrusion burst ({burst_count} messages in <3.5s) sent from ESP32 {client_ip} to ESP32-CAM {cam_ip}"
+            description=f"Rapid intrusion burst ({burst_count} messages) sent from ESP32 {client_ip} to ESP32-CAM {cam_ip}"
         )
         dq.clear()
         return
@@ -253,8 +253,8 @@ def start_kernel_connection_poller():
                         remote_ip = c.raddr.ip
                         if remote_ip.startswith("192.168.137.") and remote_ip not in PROTECTED_TARGET_IPS:
                             conn_counts[remote_ip].append(now)
-                            burst = sum(1 for t in conn_counts[remote_ip] if now - t <= 3.0)
-                            if burst >= 6:
+                            burst = sum(1 for t in conn_counts[remote_ip] if now - t <= 6.0)
+                            if burst >= 5:
                                 trigger_threat_alert(
                                     attacker_ip=remote_ip,
                                     target_cam_ip="192.168.137.55",

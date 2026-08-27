@@ -866,12 +866,74 @@ async def locations():
     ]
 
 
+@app.post("/api/threats/detect")
+@app.post("/api/threats")
+async def record_detected_threat(data: Dict[str, Any]):
+    """
+    Receives intrusion alerts from the hardware sniffer.
+    Records threat, generates MITRE mappings, and auto-quarantines the attacker device.
+    """
+    source_ip = data.get("source_ip") or data.get("sourceIp") or "unknown"
+    target_device = data.get("target_device") or data.get("targetDevice") or "192.168.137.55"
+    attack_type = data.get("attack_type") or data.get("type") or "ddos_attempt"
+    severity = data.get("severity") or "Critical"
+    score = int(data.get("threat_score") or data.get("threatScore") or 10)
+    description = data.get("description") or f"Intrusion burst detected from {source_ip} to {target_device}"
+    timestamp = data.get("timestamp") or datetime.utcnow().isoformat()
+
+    # 1. Insert Threat Record
+    threat_doc = {
+        "sourceIp": source_ip,
+        "type": attack_type,
+        "targetDevice": target_device,
+        "severity": severity,
+        "threatScore": score,
+        "description": description,
+        "timestamp": timestamp,
+        "resolved": False,
+        "status": "quarantined",
+        "attackPath": [source_ip, "HOTSPOT_GATEWAY", target_device],
+        "suggestedAction": f"Attacker device {source_ip} has been automatically quarantined via Windows Firewall and route nulling.",
+        "mitre_technique": "T1498 (Network Denial of Service)" if "ddos" in attack_type or "flood" in attack_type else "T1046 (Network Service Scanning)",
+        "mitre_tactic": "Impact" if "ddos" in attack_type or "flood" in attack_type else "Discovery",
+    }
+    await db.threats.insert_one(threat_doc)
+
+    # 2. Automatically mark attacker device as BLOCKED and QUARANTINED in database
+    if source_ip and source_ip not in ["127.0.0.1", "192.168.137.55", "192.168.137.1"]:
+        # Update devices collection
+        await db.devices.update_many(
+            {"$or": [{"ip": source_ip}, {"device_id": f"dev_esp32_node_{source_ip.split('.')[-1]}"}]},
+            {"$set": {"blocked": True, "status": "blocked", "connected": False}}
+        )
+        # Update disk cache
+        try:
+            live_f = Path("data/live_devices.json")
+            if live_f.exists():
+                live_list = json.loads(live_f.read_text(encoding="utf-8"))
+                for d in live_list:
+                    if d.get("ip") == source_ip:
+                        d["blocked"] = True
+                        d["status"] = "blocked"
+                        d["connected"] = False
+                live_f.write_text(json.dumps(live_list, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+
+    return {
+        "status": "success",
+        "message": f"Threat recorded and attacker {source_ip} moved to block list.",
+        "threat": threat_doc
+    }
+
+
 @app.get("/api/threats")
 async def get_threats(connected_only: bool = Query(False), limit: int = Query(100, ge=1, le=500)):
     """
     Normalized threat feed for the full Threats page.
     """
     return await _load_serialized_threats(connected_only=connected_only, limit=limit)
+
 
 
 @app.get("/api/metrics")
