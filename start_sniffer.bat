@@ -2,11 +2,11 @@
 setlocal
 cd /d "%~dp0backend\detection"
 
-:: Check for Administrator rights (needed for Scapy raw socket packet sniffing)
+:: Check for Administrator privileges
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [NeuroGuard] Requesting Administrator Privileges for Scapy Sniffer...
-    powershell -Command "Start-Process cmd.exe -ArgumentList '/k cd /d \"%~dp0backend\detection\" && call \"%~nx0\"' -Verb RunAs"
+    echo [NeuroGuard] Requesting Administrator Privileges...
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%comspec%' -ArgumentList '/k cd /d \"%~dp0backend\detection\" && call \"%~f0\"' -Verb RunAs"
     exit /b
 )
 
