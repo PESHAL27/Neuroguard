@@ -22,7 +22,10 @@
       "cpu": 28,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.137.0/24",
-      "interface": "Mobile Hotspot"
+      "interface": "Mobile Hotspot",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_esp32_node_63",
@@ -46,7 +49,10 @@
       "cpu": 18,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.137.0/24",
-      "interface": "Mobile Hotspot"
+      "interface": "Mobile Hotspot",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_host_hotspot_gateway",
@@ -70,7 +76,10 @@
       "cpu": 35,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.137.0/24",
-      "interface": "Mobile Hotspot"
+      "interface": "Mobile Hotspot",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_admin_pc_wifi",
@@ -94,7 +103,10 @@
       "cpu": 45,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.1.0/24",
-      "interface": "Wi-Fi"
+      "interface": "Wi-Fi",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_wifi_router_gateway",
@@ -118,7 +130,10 @@
       "cpu": 12,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.1.0/24",
-      "interface": "Wi-Fi"
+      "interface": "Wi-Fi",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_smartphone_wifi",
@@ -142,10 +157,19 @@
       "cpu": 20,
       "last_seen": "2026-08-27T14:30:00Z",
       "subnet": "192.168.1.0/24",
-      "interface": "Wi-Fi"
+      "interface": "Wi-Fi",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     }
   ],
   "unknown_devices": [],
   "threats": [],
-  "blocked_ips": []
+  "blocked_ips": [],
+  "ai_actions": [],
+  "predictions": [],
+  "hardware": [],
+  "events": [],
+  "investigations": [],
+  "telemetry": []
 }
