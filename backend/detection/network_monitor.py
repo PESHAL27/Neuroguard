@@ -1,10 +1,10 @@
 """
 NeuroGuard Real-Time Hardware Network Sniffer & Multi-Layer Intrusion Defense
 Monitors Laptop Mobile Hotspot (192.168.137.x) and Wi-Fi to protect ESP32-CAM and IoT nodes.
-Multi-Layer Detection:
-1. Scapy Packet Sniffing (Hotspot adapter + L3 Raw Sockets)
-2. Real-Time Kernel Connection & Message Burst Tracker (Catches 20-message floods even across Layer 2)
-3. Immediate Host Firewall + Kernel Route Nulling + Real-time Alerts
+
+Directionality Protection:
+- Target ESP32-CAM Node (192.168.137.55 / 192.168.137.110): PROTECTED ASSET (Never Blocked).
+- Attacker ESP32 (192.168.137.63 / Sending Node): ISOLATED & BLOCKED.
 """
 
 import os
@@ -42,6 +42,19 @@ except ImportError:
 API_URL = "http://127.0.0.1:8000/api/threats/detect"
 ALT_API_URL = "http://localhost:3050/api/threats"
 
+# Protected Assets (Target Video & Gateway Nodes - NEVER BLOCKED)
+PROTECTED_TARGET_IPS = {
+    "192.168.137.55",   # ESP32-CAM Node
+    "192.168.137.110",  # ESP32-CAM Node Alt
+    "192.168.137.1",    # Laptop Hotspot Gateway
+    "192.168.31.173",   # Admin Laptop Wi-Fi
+    "192.168.31.1",     # Wi-Fi Router
+    "192.168.1.4",
+    "192.168.1.1",
+    "127.0.0.1",
+    "0.0.0.0"
+}
+
 # Tracking data structures for flood and scan detection
 packet_history = defaultdict(lambda: deque(maxlen=100))
 target_packet_history = defaultdict(lambda: deque(maxlen=100))
@@ -49,12 +62,12 @@ port_tracker = defaultdict(set)
 last_alert_time = defaultdict(float)
 blocked_ips_set = set()
 
-COOLDOWN_SECONDS = 5.0
+COOLDOWN_SECONDS = 4.0
 
 
 def block_attacker_ip(attacker_ip: str):
     """Executes real-time Windows Firewall + Kernel Route Isolation for the attacker."""
-    if not attacker_ip or attacker_ip in ["127.0.0.1", "0.0.0.0", "localhost"] or attacker_ip in blocked_ips_set:
+    if not attacker_ip or attacker_ip in PROTECTED_TARGET_IPS or attacker_ip in blocked_ips_set:
         return
 
     blocked_ips_set.add(attacker_ip)
@@ -63,9 +76,9 @@ def block_attacker_ip(attacker_ip: str):
         # Inbound and Outbound Windows Firewall Rules
         cmd_in = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{attacker_ip}_IN" dir=in action=block remoteip={attacker_ip}'
         cmd_out = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{attacker_ip}_OUT" dir=out action=block remoteip={attacker_ip}'
-        # Route Null Blackhole (Kills Mobile Hotspot NAT forwarding)
+        # Route Null Blackhole (Kills Mobile Hotspot NAT forwarding for attacker)
         cmd_route = f'route add {attacker_ip} mask 255.255.255.255 127.0.0.1 metric 1'
-        # ARP Flush
+        # Flush ARP to drop frame resolution
         cmd_arp = f'arp -d {attacker_ip}'
 
         subprocess.run(cmd_in, shell=True, capture_output=True)
@@ -73,9 +86,9 @@ def block_attacker_ip(attacker_ip: str):
         subprocess.run(cmd_route, shell=True, capture_output=True)
         subprocess.run(cmd_arp, shell=True, capture_output=True)
 
-        print(f"✅ Attacker IP {attacker_ip} has been DISCONNECTED & BLOCKED from Mobile Hotspot.")
+        print(f"✅ Attacker Device {attacker_ip} is now DISCONNECTED & QUARANTINED from Hotspot.")
     except Exception as e:
-        print(f"❌ Failed to apply firewall quarantine: {e}")
+        print(f"❌ Failed to apply quarantine: {e}")
 
 
 def dispatch_threat_to_backend(payload: dict):
@@ -91,12 +104,19 @@ def dispatch_threat_to_backend(payload: dict):
         pass
 
 
-def trigger_threat_alert(src_ip: str, dst_ip: str, attack_type: str, severity: str, score: int, description: str):
-    """Prints live alert banner in CMD, plays audio chime, applies quarantine, and dispatches to SOC."""
+def trigger_threat_alert(attacker_ip: str, target_cam_ip: str, attack_type: str, severity: str, score: int, description: str):
+    """Prints live alert banner in CMD, plays audio chime, isolates attacker, and updates SOC."""
+    # Strict safety check: Never designate protected CAM or laptop gateway as the attacker
+    if attacker_ip in PROTECTED_TARGET_IPS:
+        if target_cam_ip not in PROTECTED_TARGET_IPS:
+            attacker_ip, target_cam_ip = target_cam_ip, attacker_ip
+        else:
+            return
+
     current_time = time.time()
-    if current_time - last_alert_time[src_ip] < COOLDOWN_SECONDS:
+    if current_time - last_alert_time[attacker_ip] < COOLDOWN_SECONDS:
         return
-    last_alert_time[src_ip] = current_time
+    last_alert_time[attacker_ip] = current_time
 
     timestamp_str = time.strftime("%H:%M:%S")
 
@@ -105,8 +125,8 @@ def trigger_threat_alert(src_ip: str, dst_ip: str, attack_type: str, severity: s
     print(f" 🚨 [SECURITY INTRUSION DETECTED] AT {timestamp_str}")
     print("=" * 74)
     print(f"  📌 Attack Type   : {attack_type}")
-    print(f"  🎯 Target Device : {dst_ip} (ESP32-CAM / Hotspot Endpoint)")
-    print(f"  💀 Attacker IP   : {src_ip} (Attacker ESP32 / Host)")
+    print(f"  🎯 Target Device : {target_cam_ip} [PROTECTED ESP32-CAM NODE]")
+    print(f"  💀 Attacker IP   : {attacker_ip} [ATTACKER ESP32 - QUARANTINED]")
     print(f"  📊 Threat Score  : {score}/10  [{severity.upper()} SEVERITY]")
     print(f"  📝 Evidence      : {description}")
     print("=" * 74)
@@ -118,13 +138,13 @@ def trigger_threat_alert(src_ip: str, dst_ip: str, attack_type: str, severity: s
     except Exception:
         pass
 
-    # 1. Execute immediate kernel isolation on the attacker IP
-    block_attacker_ip(src_ip)
+    # 1. Quarantine the ATTACKER ESP32
+    block_attacker_ip(attacker_ip)
 
     # 2. Dispatch to SOC Dashboard
     payload = {
-        "source_ip": src_ip,
-        "target_device": dst_ip,
+        "source_ip": attacker_ip,
+        "target_device": target_cam_ip,
         "attack_type": attack_type.lower().replace(" ", "_").replace("/", "_"),
         "severity": severity,
         "description": description,
@@ -132,7 +152,7 @@ def trigger_threat_alert(src_ip: str, dst_ip: str, attack_type: str, severity: s
     }
     dispatch_threat_to_backend(payload)
 
-    print(f"[*] Alert broadcasted to SOC Dashboard. Resuming traffic monitoring...\n")
+    print(f"[*] Threat dispatched to SOC Dashboard. Attacker {attacker_ip} severed from network.\n")
 
 
 def packet_analyzer(packet):
@@ -148,62 +168,77 @@ def packet_analyzer(packet):
     if src_ip.startswith("127.") or src_ip == dst_ip:
         return
 
-    # Record packet timestamps in sliding windows
-    dq = packet_history[src_ip]
-    dq.append(now)
-    target_dq = target_packet_history[(src_ip, dst_ip)]
-    target_dq.append(now)
+    # Determine true direction: Client -> CAM Server
+    # If dst_ip is the CAM (192.168.137.55), src_ip is the attacking client!
+    # If src_ip is the CAM, it is responding to dst_ip (the client).
+    if dst_ip in ["192.168.137.55", "192.168.137.110"]:
+        client_ip = src_ip
+        cam_ip = dst_ip
+    elif src_ip in ["192.168.137.55", "192.168.137.110"]:
+        client_ip = dst_ip
+        cam_ip = src_ip
+    else:
+        client_ip = src_ip
+        cam_ip = dst_ip
 
-    # 1. Check for Message Flood / DoS Burst (e.g. 20 messages sent to CAM ESP32)
-    burst_count = sum(1 for t in target_dq if now - t <= 3.5)
-    if burst_count >= 5:
-        trigger_threat_alert(
-            src_ip=src_ip,
-            dst_ip=dst_ip,
-            attack_type="DDoS Attempt / Message Flood",
-            severity="Critical",
-            score=10,
-            description=f"Rapid flood burst ({burst_count} messages/packets in <3.5s) targeting ESP32-CAM {dst_ip}"
-        )
-        target_dq.clear()
+    # If client is protected (e.g. your admin PC), ignore normal browsing
+    if client_ip in PROTECTED_TARGET_IPS:
         return
 
-    # 2. TCP Port Scan & Reconnaissance Detection
+    # Record message / packet history
+    dq = target_packet_history[(client_ip, cam_ip)]
+    dq.append(now)
+
+    # 1. Rapid Flood / Message Burst Detection (e.g. 5+ requests in 3.5s)
+    burst_count = sum(1 for t in dq if now - t <= 3.5)
+    if burst_count >= 5:
+        trigger_threat_alert(
+            attacker_ip=client_ip,
+            target_cam_ip=cam_ip,
+            attack_type="DDoS / Message Flood",
+            severity="Critical",
+            score=10,
+            description=f"Rapid intrusion burst ({burst_count} messages in <3.5s) sent from ESP32 {client_ip} to ESP32-CAM {cam_ip}"
+        )
+        dq.clear()
+        return
+
+    # 2. Port Scanning / Probing
     if packet.haslayer(TCP):
         dst_port = packet[TCP].dport
-        port_tracker[src_ip].add(dst_port)
+        port_tracker[client_ip].add(dst_port)
 
-        if len(port_tracker[src_ip]) >= 4:
-            ports_hit = list(port_tracker[src_ip])[:6]
+        if len(port_tracker[client_ip]) >= 4:
+            ports_hit = list(port_tracker[client_ip])[:6]
             trigger_threat_alert(
-                src_ip=src_ip,
-                dst_ip=dst_ip,
+                attacker_ip=client_ip,
+                target_cam_ip=cam_ip,
                 attack_type="Port Scan Reconnaissance",
                 severity="High",
                 score=8,
-                description=f"Sequential port scan probing ports {ports_hit} on {dst_ip}"
+                description=f"Sequential port scan probing ports {ports_hit} on {cam_ip}"
             )
-            port_tracker[src_ip] = set()
+            port_tracker[client_ip] = set()
             return
 
-    # 3. Payload Inspection for Video Stream Exhaustion or Attack Signatures
+    # 3. Payload Inspection
     if packet.haslayer(Raw):
         payload_bytes = bytes(packet[Raw].load)
         payload_lower = payload_bytes[:300].lower()
-        if b"/stream" in payload_lower or b"stress" in payload_lower or b"flood" in payload_lower or b"attack" in payload_lower:
+        if b"/stream" in payload_lower or b"stress" in payload_lower or b"flood" in payload_lower or b"attack" in payload_lower or b"hello" in payload_lower:
             trigger_threat_alert(
-                src_ip=src_ip,
-                dst_ip=dst_ip,
-                attack_type="HTTP Video Stream Exhaustion",
+                attacker_ip=client_ip,
+                target_cam_ip=cam_ip,
+                attack_type="HTTP Video Stream / Endpoint Stress",
                 severity="High",
                 score=9,
-                description=f"Malicious video stream request / payload probe directed at {dst_ip}"
+                description=f"Malicious stress requests directed at ESP32-CAM {cam_ip} from {client_ip}"
             )
             return
 
 
 def start_kernel_connection_poller():
-    """Background thread polling Windows active connection tables to catch floods even across Layer 2."""
+    """Background thread polling Windows active connections to detect floods from attacker ESP32s."""
     if not psutil:
         return
 
@@ -216,18 +251,17 @@ def start_kernel_connection_poller():
                 for c in conns:
                     if c.raddr and len(c.raddr) >= 2:
                         remote_ip = c.raddr.ip
-                        local_ip = c.laddr.ip if c.laddr else ""
-                        if remote_ip.startswith("192.168.137.") and not remote_ip.startswith("192.168.137.1"):
+                        if remote_ip.startswith("192.168.137.") and remote_ip not in PROTECTED_TARGET_IPS:
                             conn_counts[remote_ip].append(now)
                             burst = sum(1 for t in conn_counts[remote_ip] if now - t <= 3.0)
-                            if burst >= 8:
+                            if burst >= 6:
                                 trigger_threat_alert(
-                                    src_ip=remote_ip,
-                                    dst_ip="192.168.137.110",
-                                    attack_type="DDoS Attempt / Socket Flood",
+                                    attacker_ip=remote_ip,
+                                    target_cam_ip="192.168.137.55",
+                                    attack_type="TCP Connection Flood / DDoS",
                                     severity="Critical",
                                     score=10,
-                                    description=f"High-frequency TCP connection flood ({burst} sockets in 3s) from {remote_ip}"
+                                    description=f"Attacker ESP32 ({remote_ip}) generated {burst} rapid socket requests to ESP32-CAM"
                                 )
                                 conn_counts[remote_ip].clear()
             except Exception:
@@ -273,28 +307,6 @@ def start_sniffer_on_iface(iface):
             pass
 
 
-def start_network_monitor_thread():
-    """Starts the hardware network sniffer in a background daemon thread."""
-    interfaces = find_hotspot_and_wifi_interfaces()
-    threads = []
-    if interfaces:
-        for iface in interfaces:
-            t = threading.Thread(target=start_sniffer_on_iface, args=(iface,), daemon=True, name=f"Sniffer-{getattr(iface, 'name', 'iface')}")
-            t.start()
-            threads.append(t)
-    else:
-        try:
-            s = conf.L3socket()
-            t = threading.Thread(target=lambda: sniff(prn=packet_analyzer, store=0, opened_socket=s), daemon=True, name="Sniffer-L3")
-            t.start()
-            threads.append(t)
-        except Exception as e:
-            print(f"[!] Sniffer startup error: {e}")
-
-    start_kernel_connection_poller()
-    return threads
-
-
 def main():
     if sys.platform == "win32":
         os.system("color 0B")
@@ -306,9 +318,9 @@ def main():
   | \| |___ |__| |  \ |__| |__] |__| |  | |  \ |__/ 
     🛡️ HARDWARE NETWORK PACKET MONITOR & ATTACK BLOCKER 🛡️
 ==========================================================================
-[*] Target Network : Laptop Mobile Hotspot (192.168.137.0/24) & Wi-Fi
-[*] Monitoring     : ESP32-CAM Node, Microcontrollers, & Attacker Nodes
-[*] Auto-Quarantine: Windows Host Firewall + Kernel Route Nulling (ON)
+[*] Protected Target: ESP32-CAM Node (192.168.137.55 / 192.168.137.110)
+[*] Monitored Subnet: Laptop Mobile Hotspot (192.168.137.0/24)
+[*] Auto-Quarantine : Quarantines Attacker ESP32 (Preserves CAM Node)
 [*] Press Ctrl+C to stop.
 ==========================================================================
 """)
@@ -331,10 +343,9 @@ def main():
         except Exception as e:
             print(f"[!] Sniffer startup error: {e}")
 
-    # Start kernel socket monitor in parallel
     start_kernel_connection_poller()
 
-    print("\n[*] 🟢 ACTIVE PROTECTION RUNNING. Waiting for network traffic...\n")
+    print("\n[*] 🟢 ACTIVE PROTECTION RUNNING. Waiting for traffic from Attacker ESP32...\n")
 
     try:
         while True:
