@@ -6,7 +6,7 @@ cd /d "%~dp0backend\detection"
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [NeuroGuard] Requesting Administrator Privileges...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%comspec%' -ArgumentList '/k cd /d """"%~dp0backend\detection"""" && call """"%~f0""""' -Verb RunAs"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -WorkingDirectory '%~dp0backend\detection' -Verb RunAs"
     exit /b
 )
 

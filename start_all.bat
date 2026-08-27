@@ -2,11 +2,11 @@
 setlocal
 cd /d "%~dp0"
 
-:: Self-elevation to Administrator if needed
+:: Check for Administrator privileges
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo [NeuroGuard] Requesting Administrator Privileges...
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%comspec%' -ArgumentList '/k cd /d """"%~dp0"""" && call """"%~f0""""' -Verb RunAs"
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath '%~f0' -WorkingDirectory '%~dp0' -Verb RunAs"
     exit /b
 )
 
