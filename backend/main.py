@@ -16,7 +16,9 @@ from agent.report_engine import (
 from agent.metrics_engine import get_soc_metrics
 from agent.telemetry_engine import process_telemetry
 from agent.timeline_engine import record_event, get_events
+from agent.tools import block_ip, unblock_ip
 from live_scanner import start_scanner_background, perform_full_scan, get_active_network_details
+
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import asyncio
@@ -902,10 +904,33 @@ async def receive_device_telemetry(req: DeviceTelemetryRequest):
         summary=f"Hardware telemetry received from {req.device_id}",
     )
 
+    # Check if there is an active threat targeting this device/IP
+    active_threat = await db.threats.find_one({
+        "$or": [
+            {"targetDevice": req.device_id, "status": "active"},
+            {"sourceIp": req.ip, "status": "active"},
+            {"targetIp": req.ip, "status": "active"},
+        ]
+    })
+    threat_active = bool(active_threat or result.get("threat_detected"))
+    severity = str(
+        active_threat.get("severity") if active_threat
+        else (result.get("threat", {}).get("severity") if result.get("threat") else "low")
+    ).lower()
+
+    led_color = "green"
+    if threat_active:
+        if severity in ["critical", "high"]:
+            led_color = "red"
+        else:
+            led_color = "yellow"
+
     return {
         "status": result["status"],
         "message": result["message"],
-        "threat_detected": result.get("threat_detected", False),
+        "threat_detected": threat_active,
+        "led": led_color,
+        "action": "BLOCK_IP" if led_color == "red" else "MONITOR",
     }
 
 
@@ -995,6 +1020,11 @@ async def block_device(req: DeviceBlockRequest):
         upsert=True,
     )
 
+    # Enforce real host firewall blocking on the device IP
+    device_ip = blocked_device.get("ip")
+    if device_ip and device_ip != "unknown":
+        block_ip(device_ip)
+
     source_collection, updated_device = await find_device_record(device_id=req.device_id)
     return {"status": "blocked", "device": normalize_device_document(updated_device, source_collection)}
 
@@ -1012,8 +1042,15 @@ async def unblock_device(req: DeviceConnectRequest):
         {"$set": {"blocked": False, "status": "detected", "connected": False, "monitor": False, "blocked_at": None, "blocked_reason": None}},
     )
     await db.blocked_ips.delete_many({"device_id": normalized_existing.get("device_id")})
+
+    # Remove host firewall block rule on unblock
+    device_ip = normalized_existing.get("ip")
+    if device_ip and device_ip != "unknown":
+        unblock_ip(device_ip)
+
     source_collection, updated_device = await find_device_record(device_id=req.device_id)
     return {"status": "unblocked", "device": normalize_device_document(updated_device, source_collection)}
+
 
 @app.websocket("/ws/devices")
 async def devices_ws(ws: WebSocket):

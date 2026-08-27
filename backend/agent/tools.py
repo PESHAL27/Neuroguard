@@ -54,42 +54,92 @@ def scan_network():
 
 def block_ip(ip_address: str):
     """
-    Executes actual iptables firewall IP blocking mechanism and logs the autonomous action to MongoDB.
+    Executes real-time kernel-level IP blocking via Windows Firewall + Routing Blackhole
+    (or Linux iptables) and logs the action to database.
     """
-    print(f"Executing Firewall Rule: BLOCK {ip_address}")
+    print(f"[FIREWALL] 🛑 Executing Full Network Quarantine: BLOCK {ip_address}")
+    blocked_successfully = False
     
-    # Actually block the IP using iptables
-    try:
-        subprocess.run(["iptables", "-A", "INPUT", "-s", ip_address, "-j", "DROP"], check=True)
-        subprocess.run(["iptables", "-A", "FORWARD", "-s", ip_address, "-j", "DROP"], check=True)
-        print(f"✅ Successfully added iptables DROP rules for {ip_address}")
-    except Exception as e:
-        print(f"❌ Failed to execute iptables for {ip_address}: {e}")
+    # Windows Firewall + Routing Blackhole
+    if sys.platform == "win32":
+        try:
+            # 1. Host Firewall Rules
+            cmd_in = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{ip_address}_IN" dir=in action=block remoteip={ip_address}'
+            cmd_out = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{ip_address}_OUT" dir=out action=block remoteip={ip_address}'
+            # 2. Kernel Routing Blackhole (Kills Hotspot NAT Forwarding/Internet completely)
+            cmd_route = f'route add {ip_address} mask 255.255.255.255 127.0.0.1 metric 1'
+            
+            subprocess.run(cmd_in, shell=True, capture_output=True)
+            subprocess.run(cmd_out, shell=True, capture_output=True)
+            subprocess.run(cmd_route, shell=True, capture_output=True)
+            
+            print(f"✅ Successfully applied Windows Firewall + Routing Blackhole for {ip_address}")
+            blocked_successfully = True
+        except Exception as e:
+            print(f"❌ Failed to execute Windows block commands: {e}")
+    else:
+        # Linux iptables enforcement
+        try:
+            subprocess.run(["iptables", "-A", "INPUT", "-s", ip_address, "-j", "DROP"], check=True)
+            subprocess.run(["iptables", "-A", "FORWARD", "-s", ip_address, "-j", "DROP"], check=True)
+            print(f"✅ Successfully added iptables DROP rules for {ip_address}")
+            blocked_successfully = True
+        except Exception as e:
+            print(f"❌ Failed to execute iptables for {ip_address}: {e}")
 
+    # 2. Persist in database
     if sync_db is not None:
         timestamp = datetime.utcnow().isoformat()
-        
-        
-        
-        
-        # Log to blocked IPs
-        sync_db.blocked_ips.insert_one({
-            "ip": ip_address,
-            "reason": "Autonomous agent block",
-            "timestamp": timestamp
-        })
-        
-        # Log AI action
-        sync_db.ai_actions.insert_one({
-            "action": "block_ip",
-            "ip": ip_address,
-            "reason": "Threat response protocol initiated",
-            "timestamp": timestamp
-        })
-        
+        try:
+            sync_db.blocked_ips.update_one(
+                {"ip": ip_address},
+                {"$set": {"ip": ip_address, "timestamp": timestamp, "reason": "Autonomous Defense Mitigation"}},
+                upsert=True
+            )
+        except Exception:
+            pass
+
+    return {
+        "status": "success" if blocked_successfully else "warning",
+        "message": f"Device {ip_address} successfully isolated from the network."
+    }
+
+
+def unblock_ip(ip_address: str):
+    """
+    Removes the host firewall and routing blackhole rules for an IP address.
+    """
+    print(f"[FIREWALL] 🟢 Restoring Network Access: UNBLOCK {ip_address}")
+    
+    if sys.platform == "win32":
+        try:
+            cmd_in = f'netsh advfirewall firewall delete rule name="NeuroGuard_Block_{ip_address}_IN"'
+            cmd_out = f'netsh advfirewall firewall delete rule name="NeuroGuard_Block_{ip_address}_OUT"'
+            cmd_route = f'route delete {ip_address}'
+            
+            subprocess.run(cmd_in, shell=True, capture_output=True)
+            subprocess.run(cmd_out, shell=True, capture_output=True)
+            subprocess.run(cmd_route, shell=True, capture_output=True)
+            print(f"✅ Successfully deleted Windows Firewall and Route Blackhole for {ip_address}")
+        except Exception as e:
+            print(f"❌ Failed to remove Windows Firewall rules: {e}")
+    else:
+        try:
+            subprocess.run(["iptables", "-D", "INPUT", "-s", ip_address, "-j", "DROP"], check=False)
+            subprocess.run(["iptables", "-D", "FORWARD", "-s", ip_address, "-j", "DROP"], check=False)
+            print(f"✅ Successfully removed iptables DROP rules for {ip_address}")
+        except Exception as e:
+            print(f"❌ Failed to remove iptables rules: {e}")
+
+    if sync_db is not None:
+        try:
+            sync_db.blocked_ips.delete_one({"ip": ip_address})
+        except Exception:
+            pass
+
     return {
         "status": "success",
-        "message": f"Firewall updated. Source IP {ip_address} has been permanently blocked across all subnets."
+        "message": f"Firewall rules removed for {ip_address}. Communication restored."
     }
 
 

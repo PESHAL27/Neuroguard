@@ -398,8 +398,22 @@ def perform_full_scan() -> List[Dict[str, Any]]:
     now = time.time()
     active_devices_map: Dict[str, Tuple[str, int]] = {}
 
-    # 1. Parallel High-Speed Subnet Sweep (128 concurrent SendARP workers)
-    candidate_ips = [f"{local_24_prefix}{i}" for i in range(1, 255)]
+    # 1. Parallel High-Speed Subnet Sweep across ALL active local interfaces (including Mobile Hotspot 192.168.137.x)
+    prefixes_to_scan = {local_24_prefix}
+    try:
+        import psutil
+        for iface_name, addrs in psutil.net_if_addrs().items():
+            for addr in addrs:
+                if addr.family.name == 'AF_INET' and not addr.address.startswith("127.") and not addr.address.startswith("169.254."):
+                    p = ".".join(addr.address.split(".")[:3]) + "."
+                    prefixes_to_scan.add(p)
+    except Exception:
+        prefixes_to_scan.add("192.168.137.")
+
+    candidate_ips = []
+    for prefix in prefixes_to_scan:
+        candidate_ips.extend([f"{prefix}{i}" for i in range(1, 255)])
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=128) as executor:
         futures = {executor.submit(probe_single_ip, ip): ip for ip in candidate_ips}
         for future in concurrent.futures.as_completed(futures):
@@ -410,12 +424,13 @@ def perform_full_scan() -> List[Dict[str, Any]]:
             except Exception:
                 pass
 
-    # 2. Merge OS Kernel ARP cache
+    # 2. Merge OS Kernel ARP cache (accept all valid IPs from any local interface)
     arp_table = get_arp_table(net_info)
     for ip, mac in arp_table.items():
-        if ip.startswith(local_24_prefix) or ip == gateway_ip:
+        if not ip.endswith(".255") and not ip.startswith("224.") and not ip.startswith("239.") and ip != "255.255.255.255":
             if ip not in active_devices_map:
                 active_devices_map[ip] = (mac, 15)
+
 
     # Ensure Gateway is present
     if gateway_ip not in active_devices_map and local_ip != "127.0.0.1":

@@ -1,27 +1,32 @@
 import { MongoClient } from "mongodb";
 
-if (!process.env.MONGODB_URI) {
-    throw new Error("Please add your MongoDB URI to .env.local");
-}
-
-const uri = process.env.MONGODB_URI;
+const uri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/neuroguard";
 const options = {};
 
 let client;
 let clientPromise;
 
-if (process.env.NODE_ENV === "development") {
-    // In development, use a global variable to preserve the MongoClient
-    // across hot-reloads so connections aren't leaked.
-    if (!global._mongoClientPromise) {
+try {
+    if (process.env.NODE_ENV === "development") {
+        if (!global._mongoClientPromise) {
+            client = new MongoClient(uri, options);
+            global._mongoClientPromise = client.connect().catch((err) => {
+                console.warn("[MongoDB] Connection warning:", err.message);
+                return null;
+            });
+        }
+        clientPromise = global._mongoClientPromise;
+    } else {
         client = new MongoClient(uri, options);
-        global._mongoClientPromise = client.connect();
+        clientPromise = client.connect().catch((err) => {
+            console.warn("[MongoDB] Connection warning:", err.message);
+            return null;
+        });
     }
-    clientPromise = global._mongoClientPromise;
-} else {
-    // In production, create a new client for each instance
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+} catch (e) {
+    console.warn("[MongoDB] Client init notice:", e.message);
+    clientPromise = Promise.resolve(null);
 }
 
 export default clientPromise;
+
