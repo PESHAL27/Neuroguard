@@ -1,11 +1,10 @@
 """
-NeuroGuard Real-Time Hardware Network Sniffer & Intrusion Detection System
-Sniffs traffic on Laptop Mobile Hotspot (192.168.137.x) and Wi-Fi to protect ESP32-CAM and IoT nodes.
-Detects:
-1. High-Frequency Message / Packet Floods (e.g. 10-20 attack messages sent to ESP32-CAM)
-2. Multi-Port Scans & Probing
-3. HTTP Video Stream Exhaustion / DoS
-4. Immediate Kernel-Level Attacker Isolation & Real-Time CMD Alerts
+NeuroGuard Real-Time Hardware Network Sniffer & Multi-Layer Intrusion Defense
+Monitors Laptop Mobile Hotspot (192.168.137.x) and Wi-Fi to protect ESP32-CAM and IoT nodes.
+Multi-Layer Detection:
+1. Scapy Packet Sniffing (Hotspot adapter + L3 Raw Sockets)
+2. Real-Time Kernel Connection & Message Burst Tracker (Catches 20-message floods even across Layer 2)
+3. Immediate Host Firewall + Kernel Route Nulling + Real-time Alerts
 """
 
 import os
@@ -30,6 +29,11 @@ except ImportError:
     requests = None
 
 try:
+    import psutil
+except ImportError:
+    psutil = None
+
+try:
     from scapy.all import sniff, IP, TCP, UDP, Raw, conf, get_if_list
 except ImportError:
     print("[ERROR] Scapy is not installed. Run: pip install scapy")
@@ -39,34 +43,35 @@ API_URL = "http://127.0.0.1:8000/api/threats/detect"
 ALT_API_URL = "http://localhost:3050/api/threats"
 
 # Tracking data structures for flood and scan detection
-# {src_ip: deque of timestamps}
 packet_history = defaultdict(lambda: deque(maxlen=100))
-# {(src_ip, dst_ip): deque of timestamps}
 target_packet_history = defaultdict(lambda: deque(maxlen=100))
-# {src_ip: set of destination ports touched in recent window}
 port_tracker = defaultdict(set)
-# {src_ip: last alert timestamp to avoid spamming the same alert continuously}
 last_alert_time = defaultdict(float)
+blocked_ips_set = set()
 
-COOLDOWN_SECONDS = 6.0
+COOLDOWN_SECONDS = 5.0
 
 
 def block_attacker_ip(attacker_ip: str):
     """Executes real-time Windows Firewall + Kernel Route Isolation for the attacker."""
-    if not attacker_ip or attacker_ip in ["127.0.0.1", "0.0.0.0", "localhost"]:
+    if not attacker_ip or attacker_ip in ["127.0.0.1", "0.0.0.0", "localhost"] or attacker_ip in blocked_ips_set:
         return
 
+    blocked_ips_set.add(attacker_ip)
     print(f"\n[QUARANTINE PROTOCOL] 🛑 Isolating Attacker Device: {attacker_ip}...")
     try:
         # Inbound and Outbound Windows Firewall Rules
         cmd_in = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{attacker_ip}_IN" dir=in action=block remoteip={attacker_ip}'
         cmd_out = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{attacker_ip}_OUT" dir=out action=block remoteip={attacker_ip}'
-        # Route Null Blackhole (Stops Mobile Hotspot NAT Forwarding to target immediately)
+        # Route Null Blackhole (Kills Mobile Hotspot NAT forwarding)
         cmd_route = f'route add {attacker_ip} mask 255.255.255.255 127.0.0.1 metric 1'
+        # ARP Flush
+        cmd_arp = f'arp -d {attacker_ip}'
 
         subprocess.run(cmd_in, shell=True, capture_output=True)
         subprocess.run(cmd_out, shell=True, capture_output=True)
         subprocess.run(cmd_route, shell=True, capture_output=True)
+        subprocess.run(cmd_arp, shell=True, capture_output=True)
 
         print(f"✅ Attacker IP {attacker_ip} has been DISCONNECTED & BLOCKED from Mobile Hotspot.")
     except Exception as e:
@@ -75,7 +80,6 @@ def block_attacker_ip(attacker_ip: str):
 
 def dispatch_threat_to_backend(payload: dict):
     """Sends threat payload to FastAPI backend and Next.js frontend."""
-    # 1. FastAPI backend
     try:
         if requests:
             requests.post(API_URL, json=payload, timeout=1.5)
@@ -151,9 +155,8 @@ def packet_analyzer(packet):
     target_dq.append(now)
 
     # 1. Check for Message Flood / DoS Burst (e.g. 20 messages sent to CAM ESP32)
-    # Count packets within the last 3.5 seconds
     burst_count = sum(1 for t in target_dq if now - t <= 3.5)
-    if burst_count >= 6:  # 6 or more packets in 3.5s towards target CAM
+    if burst_count >= 5:
         trigger_threat_alert(
             src_ip=src_ip,
             dst_ip=dst_ip,
@@ -199,6 +202,42 @@ def packet_analyzer(packet):
             return
 
 
+def start_kernel_connection_poller():
+    """Background thread polling Windows active connection tables to catch floods even across Layer 2."""
+    if not psutil:
+        return
+
+    def _poller_loop():
+        conn_counts = defaultdict(lambda: deque(maxlen=50))
+        while True:
+            try:
+                now = time.time()
+                conns = psutil.net_connections(kind='inet')
+                for c in conns:
+                    if c.raddr and len(c.raddr) >= 2:
+                        remote_ip = c.raddr.ip
+                        local_ip = c.laddr.ip if c.laddr else ""
+                        if remote_ip.startswith("192.168.137.") and not remote_ip.startswith("192.168.137.1"):
+                            conn_counts[remote_ip].append(now)
+                            burst = sum(1 for t in conn_counts[remote_ip] if now - t <= 3.0)
+                            if burst >= 8:
+                                trigger_threat_alert(
+                                    src_ip=remote_ip,
+                                    dst_ip="192.168.137.110",
+                                    attack_type="DDoS Attempt / Socket Flood",
+                                    severity="Critical",
+                                    score=10,
+                                    description=f"High-frequency TCP connection flood ({burst} sockets in 3s) from {remote_ip}"
+                                )
+                                conn_counts[remote_ip].clear()
+            except Exception:
+                pass
+            time.sleep(0.4)
+
+    t = threading.Thread(target=_poller_loop, daemon=True, name="KernelConnectionPoller")
+    t.start()
+
+
 def find_hotspot_and_wifi_interfaces():
     """Finds Mobile Hotspot (192.168.137.x) and Wi-Fi network interfaces with real IPv4 addresses."""
     matched_ifaces = []
@@ -206,7 +245,6 @@ def find_hotspot_and_wifi_interfaces():
         for iface_key, iface in conf.ifaces.items():
             iface_ip = getattr(iface, "ip", "") or ""
             iface_name = getattr(iface, "name", "") or ""
-            # Exclude virtual filter drivers
             if any(skip in iface_name for skip in ["Filter", "Scheduler", "WFP", "Native MAC", "Virtual WiFi"]):
                 continue
             if "192.168.137." in iface_ip or ("Local Area Connection" in iface_name and iface_ip):
@@ -228,7 +266,6 @@ def start_sniffer_on_iface(iface):
     try:
         sniff(iface=iface, prn=packet_analyzer, store=0)
     except Exception as e:
-        # Fallback to Layer 3 raw socket
         try:
             s = conf.L3socket()
             sniff(prn=packet_analyzer, store=0, opened_socket=s)
@@ -253,6 +290,8 @@ def start_network_monitor_thread():
             threads.append(t)
         except Exception as e:
             print(f"[!] Sniffer startup error: {e}")
+
+    start_kernel_connection_poller()
     return threads
 
 
@@ -283,7 +322,6 @@ def main():
             t.start()
             threads.append(t)
     else:
-        # Generic L3 Sniff Fallback
         print("[*] 📡 Sniffing across all active network sockets...")
         try:
             s = conf.L3socket()
@@ -292,6 +330,9 @@ def main():
             threads.append(t)
         except Exception as e:
             print(f"[!] Sniffer startup error: {e}")
+
+    # Start kernel socket monitor in parallel
+    start_kernel_connection_poller()
 
     print("\n[*] 🟢 ACTIVE PROTECTION RUNNING. Waiting for network traffic...\n")
 

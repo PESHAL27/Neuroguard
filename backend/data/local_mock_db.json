@@ -22,7 +22,10 @@
       "cpu": 15,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_31_173",
@@ -46,7 +49,10 @@
       "cpu": 82,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_137_1",
@@ -70,7 +76,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_137_3",
@@ -94,7 +103,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_137_32",
@@ -118,7 +130,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_31_91",
@@ -142,7 +157,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_31_103",
@@ -166,7 +184,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     },
     {
       "_id": "dev_device_192_168_137_110",
@@ -190,7 +211,10 @@
       "cpu": 25,
       "last_seen": "2026-08-27T11:03:05Z",
       "subnet": "192.168.31.0/24",
-      "interface": "Wi-Fi / Ethernet"
+      "interface": "Wi-Fi / Ethernet",
+      "monitor": true,
+      "blocked_at": null,
+      "blocked_reason": null
     }
   ],
   "unknown_devices": [],
