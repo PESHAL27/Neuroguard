@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 
 from datetime import datetime
 try:
@@ -68,10 +69,13 @@ def block_ip(ip_address: str, reason: str = "Threat response protocol initiated"
             cmd_out = f'netsh advfirewall firewall add rule name="NeuroGuard_Block_{ip_address}_OUT" dir=out action=block remoteip={ip_address}'
             # 2. Kernel Routing Blackhole (Kills Hotspot NAT Forwarding/Internet completely)
             cmd_route = f'route add {ip_address} mask 255.255.255.255 127.0.0.1 metric 1'
+            # 3. ARP Cache Flush (Drops physical MAC frame mapping on Mobile Hotspot)
+            cmd_arp = f'arp -d {ip_address}'
             
             subprocess.run(cmd_in, shell=True, capture_output=True)
             subprocess.run(cmd_out, shell=True, capture_output=True)
             subprocess.run(cmd_route, shell=True, capture_output=True)
+            subprocess.run(cmd_arp, shell=True, capture_output=True)
             
             print(f"✅ Successfully applied Windows Firewall + Routing Blackhole for {ip_address}")
             blocked_successfully = True

@@ -1,6 +1,6 @@
 @echo off
 title NeuroGuard - Cyberattack Simulation Demo
-cd /d "c:\internalsih"
+cd /d "%~dp0"
 echo ===================================================
 echo   Launching NeuroGuard Attack Simulator
 echo   Working Directory: %CD%

@@ -1,0 +1,1654 @@
+{
+  "devices": [
+    {
+      "_id": "dev_device_192_168_31_1",
+      "device_id": "device_192_168_31_1",
+      "name": "Network Gateway Router",
+      "hostname": "gateway-192-168-31-1.lan",
+      "ip": "192.168.31.1",
+      "mac": "FC:B0:DE:23:D9:EC",
+      "type": "router",
+      "type_guess": "router",
+      "vendor": "Default Gateway Controller",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 1200,
+      "connections": 32,
+      "cpu": 15,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_31_173",
+      "device_id": "device_192_168_31_173",
+      "name": "Admin Host PC (Your Device)",
+      "hostname": "admin.lan",
+      "ip": "192.168.31.173",
+      "mac": "50:BB:B5:79:E7:18",
+      "type": "desktop",
+      "type_guess": "desktop",
+      "vendor": "Local Host Controller",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 3500,
+      "connections": 14,
+      "cpu": 82,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_137_1",
+      "device_id": "device_192_168_137_1",
+      "name": "Windows Laptop (1)",
+      "hostname": "admin.mshome.net",
+      "ip": "192.168.137.1",
+      "mac": "56:BB:B5:79:E7:18",
+      "type": "laptop",
+      "type_guess": "laptop",
+      "vendor": "Windows Laptop Client",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_137_3",
+      "device_id": "device_192_168_137_3",
+      "name": "Realme Smartphone (realme-NARZO-80-Lite-5G.mshome.net)",
+      "hostname": "realme-NARZO-80-Lite-5G.mshome.net",
+      "ip": "192.168.137.3",
+      "mac": "E6:C2:DC:A6:1A:7C",
+      "type": "phone",
+      "type_guess": "phone",
+      "vendor": "Mobile Device",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_137_32",
+      "device_id": "device_192_168_137_32",
+      "name": "ESP32 Node (32)",
+      "hostname": "esp32-AB7F08.mshome.net",
+      "ip": "192.168.137.32",
+      "mac": "20:E7:C8:AB:7F:08",
+      "type": "esp32",
+      "type_guess": "esp32",
+      "vendor": "Espressif Systems",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_31_91",
+      "device_id": "device_192_168_31_91",
+      "name": "Amazon Echo / Smart Sensor",
+      "hostname": "node-91.lan",
+      "ip": "192.168.31.91",
+      "mac": "14:07:08:35:82:C9",
+      "type": "sensor",
+      "type_guess": "sensor",
+      "vendor": "LAN Hardware Client",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_31_103",
+      "device_id": "device_192_168_31_103",
+      "name": "Dell / Windows System Workstation",
+      "hostname": "SYSTEM1.lan",
+      "ip": "192.168.31.103",
+      "mac": "00:B0:0B:F3:41:75",
+      "type": "laptop",
+      "type_guess": "laptop",
+      "vendor": "LAN Hardware Client",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    },
+    {
+      "_id": "dev_device_192_168_137_110",
+      "device_id": "device_192_168_137_110",
+      "name": "Espressif ESP32 IoT Node",
+      "hostname": "esp32-D5316C.mshome.net",
+      "ip": "192.168.137.110",
+      "mac": "3C:8A:1F:D5:31:6C",
+      "type": "esp32",
+      "type_guess": "esp32",
+      "vendor": "Espressif Systems",
+      "status": "connected",
+      "connected": true,
+      "trusted": true,
+      "surveillance": false,
+      "blocked": false,
+      "threat_count": 0,
+      "latency_ms": 10,
+      "network_usage": 450,
+      "connections": 4,
+      "cpu": 25,
+      "last_seen": "2026-08-27T11:03:05Z",
+      "subnet": "192.168.31.0/24",
+      "interface": "Wi-Fi / Ethernet"
+    }
+  ],
+  "unknown_devices": [],
+  "telemetry": [],
+  "flows": [
+    {
+      "src": "192.168.137.50",
+      "dst": "192.168.1.111",
+      "port": 443,
+      "protocol": "HTTP",
+      "bytes": 550000,
+      "packets": 1120,
+      "device_id": "esp32_node_01",
+      "timestamp": "2026-08-27T09:25:00Z",
+      "_id": "8676a1f4-25d5-4d2e-b9b5-dc975be7a2fe"
+    },
+    {
+      "src": "192.168.137.50",
+      "dst": "192.168.1.111",
+      "port": 443,
+      "protocol": "HTTP",
+      "bytes": 550000,
+      "packets": 1120,
+      "device_id": "esp32_node_01",
+      "timestamp": "2026-08-27T09:24:38Z",
+      "_id": "5d8bd9d9-c59d-4def-bb13-9b835a77b5d2"
+    },
+    {
+      "src": "192.168.137.199",
+      "dst": "192.168.1.111",
+      "port": 554,
+      "protocol": "TCP",
+      "bytes": 0,
+      "packets": 1440,
+      "device_id": "esp32_node_01",
+      "timestamp": "2026-08-27T09:27:00Z",
+      "_id": "7edb5e99-f53f-4d18-9b78-2e6cc89407ba"
+    }
+  ],
+  "threats": [],
+  "network_logs": [
+    {
+      "timestamp": "2026-08-27T09:25:00Z",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.50",
+      "_id": "52f90879-33e7-4d6d-b465-36899d1479bc"
+    },
+    {
+      "timestamp": "2026-08-27T09:24:38Z",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.50",
+      "_id": "a2a018bf-675e-4f6b-b010-6197dc6efe11"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:33.719555",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "c7fec1be-5c06-4a20-bee3-683d3a0ada6c"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:36.194122",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "469ab64a-0c0c-4a34-9f57-e5486f26b6b1"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:37.405728",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "0e78970d-eea3-4d6f-ace8-46621bc36fa3"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:38.636142",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "7101a729-b183-448f-8f27-b46c648824d3"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:39.846675",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "2e587568-5da9-46c5-b917-a3ee59d175d0"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:41.157461",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "919cdc87-b596-4a7f-89ab-828a0041aea1"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:42.370818",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "983208d4-e607-4286-8919-005c11b5eed8"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:43.596760",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "d6e79535-f36a-4589-ba8b-566be0cbe69d"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:44.826385",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "9bab7624-a514-42b3-ae8c-0e2b5999bbda"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:46.043845",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "6afc11c4-0963-428f-8d91-0c44f55efc80"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:47.253265",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "f44d588b-2d6d-4e43-b1ae-1194e0d3703e"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:48.454010",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical message flood DoS detected from source IP 192.168.137.199 targeting esp32_node_01 with a threat score of 95. The flood is overwhelming the ESP32 node and poses an immediate risk of service disruption or device compromise. Blocking the source IP is the fastest and most targeted defensive action to halt the attack traffic and restore normal operation to the node.",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "a7ef001e-c72c-41b4-9a5a-91cb8386334b"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:49.702618",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "43a8bed1-c1f6-48b9-8dda-61b556bfc380"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:53.818366",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "41f3c109-9d63-45a0-a599-ec115259488b"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:54.027528",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "46f1cc96-41d9-4372-9827-7595f036697c"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:55.250983",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "0ec1c185-02eb-471f-8d18-ab3296e97ec3"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:56.460289",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "70260fad-5031-41be-aae6-0a34037c5f98"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:57.689596",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "3119840c-9d05-4315-b198-96e52a3fff65"
+    },
+    {
+      "timestamp": "2026-08-27T10:19:58.923374",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "fca3aef8-2ffa-4d33-8f1c-19628a27731a"
+    },
+    {
+      "timestamp": "2026-08-27T10:20:00.133639",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.137.199 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "esp32_node_01",
+      "source_ip": "192.168.137.199",
+      "_id": "72355859-3fd4-4580-83b0-ef4ff9f16d09"
+    },
+    {
+      "timestamp": "2026-08-27T10:44:48.936044",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.31.173 \u2014 Critical DDoS message flood detected from source IP 192.168.31.173 targeting IoT device 192.168.31.76 with maximum threat score of 10. The attack originates from within the local network, indicating a potentially compromised internal device. Blocking the source IP immediately halts the flood and protects the target IoT device from service disruption.",
+      "device_id": "192.168.31.76",
+      "source_ip": "192.168.31.173",
+      "_id": "4473320b-2285-4f4f-aa29-200b133f8ac0"
+    },
+    {
+      "timestamp": "2026-08-27T10:44:52.214558",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.31.76 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "device_192_168_31_173",
+      "source_ip": "192.168.31.76",
+      "_id": "3f32b939-b8d0-4ff6-9085-c720ec3a5d09"
+    },
+    {
+      "timestamp": "2026-08-27T10:44:56.111935",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 192.168.31.1 \u2014 Critical severity \u2014 auto-blocked by fallback rules",
+      "device_id": "device_192_168_31_173",
+      "source_ip": "192.168.31.1",
+      "_id": "6aa5b3f7-f4db-4f05-8821-01a38f744fed"
+    },
+    {
+      "timestamp": "2026-08-27T10:44:58.856510",
+      "type": "security",
+      "level": "critical",
+      "message": "AI Decision: block_ip for 104.16.184.241 \u2014 Critical DDoS message flood detected from source IP 104.16.184.241 targeting internal IoT device device_192_168_31_173 with maximum threat score 10/10. The source IP falls within a known Cloudflare range, suggesting a potential reflection/amplification attack or spoofed source. Immediate IP blocking is required to protect the target device and preserve network integrity.",
+      "device_id": "device_192_168_31_173",
+      "source_ip": "104.16.184.241",
+      "_id": "7358a8d6-7c16-4e8e-8e41-6e16a600b4d8"
+    }
+  ],
+  "blocked_ips": [],
+  "investigations": [],
+  "predictions": [],
+  "events": [],
+  "ai_actions": [],
+  "hardware": [],
+  "reports": [
+    {
+      "id": "RPT-2026-0827-2952",
+      "name": "Weekly Executive Summary",
+      "created": "2026-08-27T09:43:18.336294",
+      "timeRange": "Weekly",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "7a117f07-515d-4385-b14a-363c72003097"
+    },
+    {
+      "id": "RPT-2026-0827-8435",
+      "name": "Weekly Executive Summary",
+      "created": "2026-08-27T09:43:21.289367",
+      "timeRange": "Weekly",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "54e50dd3-8d47-4757-8d10-3efb60f97116"
+    },
+    {
+      "id": "RPT-2026-0827-3375",
+      "name": "Weekly Executive Summary",
+      "created": "2026-08-27T09:43:22.184022",
+      "timeRange": "Weekly",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "e931a135-2a18-420d-ba79-8d7d263ae886"
+    },
+    {
+      "id": "RPT-2026-0827-6662",
+      "name": "Weekly Executive Summary",
+      "created": "2026-08-27T09:43:23.414795",
+      "timeRange": "Weekly",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "80ed3742-66c1-4a77-947d-0b021b703b3c"
+    },
+    {
+      "id": "RPT-2026-0827-1683",
+      "name": "Daily Security Report",
+      "created": "2026-08-27T09:43:59.371904",
+      "timeRange": "Daily",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "a505a36c-1e50-4380-9992-8e8ea2f12490"
+    },
+    {
+      "id": "RPT-2026-0827-3175",
+      "name": "Daily Security Report",
+      "created": "2026-08-27T09:43:59.385809",
+      "timeRange": "Daily",
+      "format": "JSON",
+      "summary": {
+        "totalThreats": 0,
+        "blockedIPs": 0,
+        "devicesMonitored": 7,
+        "criticalIncidents": 0,
+        "complianceScore": 96
+      },
+      "topAttacks": [
+        {
+          "type": "Port Scan",
+          "count": 18,
+          "percentage": 46,
+          "color": "amber",
+          "hex": "#FBBF24"
+        },
+        {
+          "type": "Brute Force",
+          "count": 9,
+          "percentage": 23,
+          "color": "orange",
+          "hex": "#F97316"
+        },
+        {
+          "type": "Suspicious Activity",
+          "count": 6,
+          "percentage": 15,
+          "color": "yellow",
+          "hex": "#EAB308"
+        },
+        {
+          "type": "IoT Botnet",
+          "count": 4,
+          "percentage": 10,
+          "color": "cyan",
+          "hex": "#06B6D4"
+        },
+        {
+          "type": "DDoS Attempt",
+          "count": 2,
+          "percentage": 5,
+          "color": "rose",
+          "hex": "#F43F5E"
+        }
+      ],
+      "targetedDevices": [
+        {
+          "name": "Network Gateway Router",
+          "type": "Network",
+          "hits": 12
+        },
+        {
+          "name": "Admin Host PC (Your Device)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "Windows Laptop (1)",
+          "type": "Endpoint",
+          "hits": 4
+        },
+        {
+          "name": "ESP32 Node (32)",
+          "type": "IoT",
+          "hits": 4
+        }
+      ],
+      "topAttackerIPs": [
+        {
+          "ip": "185.220.101.5",
+          "country": "RU",
+          "hits": 42,
+          "trend": "up"
+        },
+        {
+          "ip": "194.26.29.112",
+          "country": "NL",
+          "hits": 28,
+          "trend": "stable"
+        },
+        {
+          "ip": "45.154.255.89",
+          "country": "RO",
+          "hits": 19,
+          "trend": "stable"
+        },
+        {
+          "ip": "103.149.130.4",
+          "country": "CN",
+          "hits": 14,
+          "trend": "up"
+        },
+        {
+          "ip": "89.248.165.74",
+          "country": "US",
+          "hits": 9,
+          "trend": "stable"
+        }
+      ],
+      "networkActivity": {
+        "totalTraffic": "1.0 MB",
+        "dataUsage": {
+          "in": "0.6 MB",
+          "out": "0.4 MB"
+        },
+        "connections": "460",
+        "suspicious": 3,
+        "heatMapData": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          100,
+          0,
+          100,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "deviceSummary": {
+        "total": 8,
+        "healthy": 8,
+        "vulnerable": 0,
+        "investigating": 0,
+        "blocked": 0
+      },
+      "aiInsights": {
+        "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+        "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+        "patterns": [
+          "Autonomous ARP inspection actively monitoring local /24 subnet.",
+          "Zero-Trust firewall rules active on 8 verified client device(s).",
+          "Telemetry flow analytics operating with sub-millisecond response latency."
+        ],
+        "improvements": [
+          "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+          "Maintain automated continuous ARP polling across active interfaces.",
+          "Review firewall isolation rules for persistent suspicious IP ranges."
+        ]
+      },
+      "auditLogs": [
+        {
+          "time": "09:25:00",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        },
+        {
+          "time": "09:24:38",
+          "type": "DEFENSE",
+          "user": "neuro_core",
+          "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+        }
+      ],
+      "investigations": [],
+      "size": "2.9 KB",
+      "_id": "f3cd3c3f-f192-4214-a5c1-1bf0b6b63eae"
+    }
+  ]
+}

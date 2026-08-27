@@ -11,7 +11,6 @@ function runPythonScanner() {
         const candidates = [
             path.join(process.cwd(), "..", "backend", "live_scanner.py"),
             path.join(process.cwd(), "backend", "live_scanner.py"),
-            path.resolve("c:\\internalsih\\backend\\live_scanner.py"),
         ];
         const target = candidates.find(p => fs.existsSync(p)) || candidates[0];
         exec(`python "${target}" --once`, { timeout: 8000 }, (error, stdout, stderr) => {

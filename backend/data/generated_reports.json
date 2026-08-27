@@ -1,5 +1,1175 @@
 [
   {
+    "id": "RPT-2026-0827-3175",
+    "name": "Daily Security Report",
+    "created": "2026-08-27T09:43:59.385809",
+    "timeRange": "Daily",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
+    "id": "RPT-2026-0827-1683",
+    "name": "Daily Security Report",
+    "created": "2026-08-27T09:43:59.371904",
+    "timeRange": "Daily",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
+    "id": "RPT-2026-0827-6662",
+    "name": "Weekly Executive Summary",
+    "created": "2026-08-27T09:43:23.414795",
+    "timeRange": "Weekly",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
+    "id": "RPT-2026-0827-3375",
+    "name": "Weekly Executive Summary",
+    "created": "2026-08-27T09:43:22.184022",
+    "timeRange": "Weekly",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
+    "id": "RPT-2026-0827-8435",
+    "name": "Weekly Executive Summary",
+    "created": "2026-08-27T09:43:21.289367",
+    "timeRange": "Weekly",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
+    "id": "RPT-2026-0827-2952",
+    "name": "Weekly Executive Summary",
+    "created": "2026-08-27T09:43:18.336294",
+    "timeRange": "Weekly",
+    "format": "JSON",
+    "summary": {
+      "totalThreats": 0,
+      "blockedIPs": 0,
+      "devicesMonitored": 7,
+      "criticalIncidents": 0,
+      "complianceScore": 96
+    },
+    "topAttacks": [
+      {
+        "type": "Port Scan",
+        "count": 18,
+        "percentage": 46,
+        "color": "amber",
+        "hex": "#FBBF24"
+      },
+      {
+        "type": "Brute Force",
+        "count": 9,
+        "percentage": 23,
+        "color": "orange",
+        "hex": "#F97316"
+      },
+      {
+        "type": "Suspicious Activity",
+        "count": 6,
+        "percentage": 15,
+        "color": "yellow",
+        "hex": "#EAB308"
+      },
+      {
+        "type": "IoT Botnet",
+        "count": 4,
+        "percentage": 10,
+        "color": "cyan",
+        "hex": "#06B6D4"
+      },
+      {
+        "type": "DDoS Attempt",
+        "count": 2,
+        "percentage": 5,
+        "color": "rose",
+        "hex": "#F43F5E"
+      }
+    ],
+    "targetedDevices": [
+      {
+        "name": "Network Gateway Router",
+        "type": "Network",
+        "hits": 12
+      },
+      {
+        "name": "Admin Host PC (Your Device)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "Windows Laptop (1)",
+        "type": "Endpoint",
+        "hits": 4
+      },
+      {
+        "name": "ESP32 Node (32)",
+        "type": "IoT",
+        "hits": 4
+      }
+    ],
+    "topAttackerIPs": [
+      {
+        "ip": "185.220.101.5",
+        "country": "RU",
+        "hits": 42,
+        "trend": "up"
+      },
+      {
+        "ip": "194.26.29.112",
+        "country": "NL",
+        "hits": 28,
+        "trend": "stable"
+      },
+      {
+        "ip": "45.154.255.89",
+        "country": "RO",
+        "hits": 19,
+        "trend": "stable"
+      },
+      {
+        "ip": "103.149.130.4",
+        "country": "CN",
+        "hits": 14,
+        "trend": "up"
+      },
+      {
+        "ip": "89.248.165.74",
+        "country": "US",
+        "hits": 9,
+        "trend": "stable"
+      }
+    ],
+    "networkActivity": {
+      "totalTraffic": "1.0 MB",
+      "dataUsage": {
+        "in": "0.6 MB",
+        "out": "0.4 MB"
+      },
+      "connections": "460",
+      "suspicious": 3,
+      "heatMapData": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "deviceSummary": {
+      "total": 8,
+      "healthy": 8,
+      "vulnerable": 0,
+      "investigating": 0,
+      "blocked": 0
+    },
+    "aiInsights": {
+      "summary": "NeuroGuard SOC has processed 0 threat telemetry signals with 0 critical incidents. Active subnet device integrity is at 100%. Zero-Trust enforcement is actively shielding endpoints across the local mesh.",
+      "riskAnalysis": "Primary monitoring vector is Port Scan from external network nodes. 0 device(s) are currently under automated watchdog surveillance.",
+      "patterns": [
+        "Autonomous ARP inspection actively monitoring local /24 subnet.",
+        "Zero-Trust firewall rules active on 8 verified client device(s).",
+        "Telemetry flow analytics operating with sub-millisecond response latency."
+      ],
+      "improvements": [
+        "Enforce network segmentation for unmanaged IoT and embedded peripherals.",
+        "Maintain automated continuous ARP polling across active interfaces.",
+        "Review firewall isolation rules for persistent suspicious IP ranges."
+      ]
+    },
+    "auditLogs": [
+      {
+        "time": "09:25:00",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      },
+      {
+        "time": "09:24:38",
+        "type": "DEFENSE",
+        "user": "neuro_core",
+        "action": "AI Decision: block_ip for 192.168.137.50 \u2014 Critical severity \u2014 auto-blocked by fallback rules"
+      }
+    ],
+    "investigations": [],
+    "size": "2.9 KB"
+  },
+  {
     "id": "RPT-2026-0826-2938",
     "name": "Weekly Executive Summary",
     "created": "2026-08-26T11:36:26.044319",

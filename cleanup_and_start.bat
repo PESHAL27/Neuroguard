@@ -10,18 +10,18 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8000" ^| findstr "LISTENING
 
 timeout /t 1 >nul
 
-echo [2/4] Launching FastAPI Backend (c:\internalsih\backend)...
-start "NeuroGuard Backend (Port 8000)" cmd /k "cd /d c:\internalsih\backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+echo [2/4] Launching FastAPI Backend (Port 8000)...
+start "NeuroGuard Backend (Port 8000)" cmd /k "cd /d ""%~dp0backend"" && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000"
 
 timeout /t 2 >nul
 
-echo [3/4] Launching Next.js Frontend (c:\internalsih\frontend)...
-start "NeuroGuard Frontend (Port 3000)" cmd /k "cd /d c:\internalsih\frontend && npm run dev"
+echo [3/4] Launching Next.js Frontend (Port 3050)...
+start "NeuroGuard Frontend (Port 3050)" cmd /k "cd /d ""%~dp0frontend"" && npm.cmd run dev"
 
 timeout /t 2 >nul
 
 echo [4/4] Launching Hardware Packet Sniffer...
-start "NeuroGuard Packet Monitor" cmd /k "cd /d c:\internalsih\backend\detection && python network_monitor.py"
+start "NeuroGuard Packet Monitor" cmd /k "cd /d ""%~dp0backend\detection"" && python network_monitor.py"
 
 echo.
 echo ===================================================

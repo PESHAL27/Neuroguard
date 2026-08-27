@@ -246,10 +246,16 @@ export default function Threats() {
                     </div>
                     <div className="flex gap-2">
                         <button
-                            onClick={() => window.location.reload()}
-                            className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:border-white/30 hover:text-white transition-all"
+                            onClick={async () => {
+                                try {
+                                    await fetch("/api/clear-history", { method: "POST" });
+                                } catch (e) {}
+                                window.location.reload();
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold bg-rose-500/15 border border-rose-500/30 text-rose-300 hover:bg-rose-500/25 hover:border-rose-500/50 hover:text-white transition-all cursor-pointer"
+                            title="Reset all threats and restore clean baseline"
                         >
-                            {icons.refresh} <span>REFRESH_DATA</span>
+                            {icons.refresh} <span>RESET_THREATS</span>
                         </button>
                         <div className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold bg-white/5 border border-white/10 text-white/70">
                             {icons.filter} <span>{activeFilter.toUpperCase()}</span>

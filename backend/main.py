@@ -365,14 +365,9 @@ async def load_all_devices():
     seen_keys = set()
     merged = []
     
-    for d in known_devices + unknown_devices:
-        key = d.get("ip") or d.get("mac") or d.get("device_id")
-        if key:
-            seen_keys.add(key)
-        merged.append(d)
-        
-    # Merge dynamically scanned devices from live_devices.json
+    # 1. Load dynamically scanned real hardware devices from live_devices.json
     live_file = Path(__file__).resolve().parent / "data" / "live_devices.json"
+    scanned_ips = set()
     if live_file.exists():
         try:
             with open(live_file, "r", encoding="utf-8") as f:
@@ -382,10 +377,30 @@ async def load_all_devices():
                         key = raw_dev.get("ip") or raw_dev.get("mac") or raw_dev.get("device_id")
                         if key and key not in seen_keys:
                             seen_keys.add(key)
-                            normalized = normalize_device_document(raw_dev, "unknown_devices")
+                            if raw_dev.get("ip"):
+                                scanned_ips.add(raw_dev["ip"])
+                            normalized = normalize_device_document(raw_dev, "devices")
                             merged.append(normalized)
         except Exception:
             pass
+
+    # 2. Merge user-saved or currently blocked devices (ignoring synthetic mock IPs)
+    for d in known_devices + unknown_devices:
+        ip = d.get("ip") or ""
+        if ip.startswith("104.") or ip == "192.168.137.50" or ip.startswith("169.254."):
+            continue
+        key = ip or d.get("mac") or d.get("device_id")
+        if key and key not in seen_keys:
+            if d.get("blocked") or ip in scanned_ips or ip.startswith("192.168.137.") or ip.startswith("192.168.31."):
+                seen_keys.add(key)
+                merged.append(d)
+        elif key:
+            for m in merged:
+                if (m.get("ip") and m.get("ip") == ip) or (m.get("device_id") and m.get("device_id") == d.get("device_id")):
+                    if d.get("blocked"):
+                        m["blocked"] = True
+                        m["status"] = "blocked"
+                        m["connected"] = False
 
     merged.sort(
         key=lambda device: (
@@ -725,6 +740,90 @@ async def receive_telemetry(data: Dict[str, Any]):
         "message": result["message"],
         "threat_detected": result["threat_detected"],
         "prediction_generated": result["prediction_generated"],
+    }
+
+@app.post("/api/clear-history")
+@app.post("/api/system/reset")
+async def clear_system_history():
+    """
+    Clears all active/historical threats, unblocks all quarantined devices
+    from Windows Firewall, and resets all devices back to normal connected state.
+    """
+    if db is not None:
+        # 1. Unblock all currently blocked IPs in Windows Firewall
+        try:
+            blocked_docs = await db.blocked_ips.find({}).to_list(100)
+            for b in blocked_docs:
+                ip = b.get("ip")
+                if ip and ip != "unknown":
+                    unblock_ip(ip)
+        except Exception:
+            pass
+
+        # 2. Wipe threats, predictions, AI actions, and investigations
+        try:
+            await db.threats.delete_many({})
+            await db.predictions.delete_many({})
+            await db.ai_actions.delete_many({})
+            await db.events.delete_many({})
+            await db.blocked_ips.delete_many({})
+            await db.investigations.delete_many({})
+            await db.telemetry.delete_many({})
+            await db.unknown_devices.delete_many({})
+        except Exception:
+            pass
+
+        # 3. Restore all devices to normal connected & unblocked state
+        try:
+            await db.devices.update_many(
+                {},
+                {
+                    "$set": {
+                        "blocked": False,
+                        "status": "connected",
+                        "connected": True,
+                        "monitor": True,
+                        "blocked_at": None,
+                        "blocked_reason": None,
+                        "threat_count": 0,
+                    }
+                }
+            )
+            await db.unknown_devices.update_many(
+                {},
+                {
+                    "$set": {
+                        "blocked": False,
+                        "status": "connected",
+                        "connected": True,
+                        "monitor": True,
+                        "blocked_at": None,
+                        "blocked_reason": None,
+                        "threat_count": 0,
+                    }
+                }
+            )
+        except Exception:
+            pass
+
+        # Persist to local storage
+        if hasattr(db, "_save_disk"):
+            db._save_disk()
+
+    # Clear threats_data.json on disk if present
+    try:
+        t_file = Path(__file__).resolve().parent / "data" / "threats_data.json"
+        if t_file.exists():
+            t_file.write_text("[]", encoding="utf-8")
+        o_file = Path(__file__).resolve().parent / "data" / "device_overrides.json"
+        if o_file.exists():
+            o_file.write_text("{}", encoding="utf-8")
+    except Exception:
+        pass
+
+    return {
+        "status": "success",
+        "message": "All threat alerts erased, firewall rules unblocked, and devices restored to normal status."
     }
 
 @app.get("/api/dashboard")
@@ -1142,7 +1241,7 @@ async def unblock_device(req: DeviceConnectRequest):
     target_collection = db.devices if source_collection == "devices" else db.unknown_devices
     await target_collection.update_one(
         {"_id": existing_device["_id"]},
-        {"$set": {"blocked": False, "status": "detected", "connected": False, "monitor": False, "blocked_at": None, "blocked_reason": None}},
+        {"$set": {"blocked": False, "status": "connected", "connected": True, "monitor": True, "blocked_at": None, "blocked_reason": None}},
     )
     await db.blocked_ips.delete_many({"device_id": normalized_existing.get("device_id")})
 

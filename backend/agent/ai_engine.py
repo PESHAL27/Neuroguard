@@ -154,7 +154,7 @@ def _call_openrouter_api(prompt_text: str) -> Optional[dict]:
             method="POST",
         )
         ctx = ssl.create_default_context()
-        with urllib.request.urlopen(req, context=ctx, timeout=15) as response:
+        with urllib.request.urlopen(req, context=ctx, timeout=3) as response:
             res_data = json.loads(response.read().decode("utf-8"))
 
         raw_text = (

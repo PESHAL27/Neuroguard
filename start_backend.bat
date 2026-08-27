@@ -10,7 +10,7 @@ if %errorLevel% neq 0 (
 )
 
 title NeuroGuard — Backend API (Administrator)
-cd /d "c:\internalsih\backend"
+cd /d "%~dp0backend"
 echo ===================================================
 echo   Starting NeuroGuard Backend API (Port 8000 - Admin)
 echo   Working Directory: %CD%

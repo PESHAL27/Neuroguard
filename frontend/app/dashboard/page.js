@@ -144,10 +144,10 @@ export default function Dashboard() {
                                             </span>
                                         </div>
                                         <h4 className="text-base font-bold text-white mt-1">
-                                            {activeIncident.type || "Critical IoT Attack"} ➔ Target: {activeIncident.target_device || "ESP32 Camera"}
+                                            {activeIncident.type || activeIncident.attack_type || "Critical IoT Intrusion"} ➔ Target: {activeIncident.target || activeIncident.target_device || activeIncident.targetDevice || "ESP32 Camera Node"}
                                         </h4>
                                         <p className="text-xs text-rose-200/80 mt-0.5">
-                                            Source: <span className="font-mono text-white font-bold">{activeIncident.source_ip}</span> • Action: <span className="text-emerald-400 font-bold">{activeIncident.action_taken || "Autonomous Quarantine Enforced"}</span>
+                                            Attacker: <span className="font-mono text-white font-bold">{activeIncident.sourceIp || activeIncident.source_ip || "192.168.137.X"}</span> • Action: <span className="text-emerald-400 font-bold">{activeIncident.action_taken || activeIncident.suggestedAction || "Autonomous Firewall Isolation Active"}</span>
                                         </p>
                                     </div>
                                 </div>

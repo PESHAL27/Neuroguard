@@ -89,22 +89,9 @@ export default function SecurityStatusCards() {
         loadStats();
         const pollInterval = setInterval(loadStats, 1500);
 
-        let eventSource;
-        try {
-            eventSource = new EventSource("/api/devices/stream");
-            eventSource.onmessage = (event) => {
-                if (!isMounted) return;
-                try {
-                    const data = JSON.parse(event.data);
-                    updateStatsFromDevices(data);
-                } catch (e) {}
-            };
-        } catch (e) {}
-
         return () => {
             isMounted = false;
             clearInterval(pollInterval);
-            if (eventSource) eventSource.close();
         };
     }, []);
 

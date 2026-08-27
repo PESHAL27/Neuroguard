@@ -37,7 +37,7 @@ export default function ThreatMonitorFeed() {
         };
 
         fetchThreats();
-        const interval = setInterval(fetchThreats, 5000);
+        const interval = setInterval(fetchThreats, 1500);
         return () => clearInterval(interval);
     }, []);
 

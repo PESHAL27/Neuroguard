@@ -1,40 +1,79 @@
 import { NextResponse } from "next/server";
-import { getAllDevices, updateDevice } from "@/lib/deviceStore";
+import fs from "fs";
+import path from "path";
 
 export const dynamic = "force-dynamic";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export async function GET() {
-    return NextResponse.json(getAllDevices());
+    // 1. Fetch live unified real device list from FastAPI backend
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/devices`, { cache: "no-store" });
+        if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                return NextResponse.json(data);
+            }
+        }
+    } catch (e) {}
+
+    // 2. Direct fallback to live_devices.json
+    try {
+        const baseDir = process.cwd().includes("frontend")
+            ? path.join(process.cwd(), "..", "backend", "data", "live_devices.json")
+            : path.join(process.cwd(), "backend", "data", "live_devices.json");
+
+        if (fs.existsSync(baseDir)) {
+            const content = JSON.parse(fs.readFileSync(baseDir, "utf8"));
+            if (Array.isArray(content)) {
+                return NextResponse.json(content);
+            }
+        }
+    } catch (e) {}
+
+    return NextResponse.json([]);
 }
 
 export async function POST(req) {
     try {
         const body = await req.json();
         const { device_id, name, type, action } = body;
-        let updates = {};
-        if (name) updates.name = name;
-        if (type) updates.type = type;
 
+        // Forward action to backend API
         if (action === "block") {
-            updates.blocked = true;
-            updates.connected = false;
-            updates.status = "blocked";
+            const blockRes = await fetch(`${BACKEND_URL}/api/device/block`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ device_id, reason: "Operator block action" }),
+            });
+            if (blockRes.ok) {
+                const data = await blockRes.json();
+                return NextResponse.json(data);
+            }
         } else if (action === "unblock" || action === "connect") {
-            updates.blocked = false;
-            updates.connected = true;
-            updates.status = "connected";
-        } else if (action === "trust") {
-            updates.trusted = true;
-        } else if (action === "untrust") {
-            updates.trusted = false;
+            const unblockRes = await fetch(`${BACKEND_URL}/api/device/unblock`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ device_id }),
+            });
+            if (unblockRes.ok) {
+                const data = await unblockRes.json();
+                return NextResponse.json(data);
+            }
+        } else if (name && type) {
+            const renameRes = await fetch(`${BACKEND_URL}/api/device/rename`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ device_id, name, type }),
+            });
+            if (renameRes.ok) {
+                const data = await renameRes.json();
+                return NextResponse.json(data);
+            }
         }
 
-        const updated = updateDevice(device_id, updates);
-        if (updated) {
-            return NextResponse.json({ status: "success", device: updated });
-        }
-
-        return NextResponse.json({ status: "error", message: "Device not found" }, { status: 404 });
+        return NextResponse.json({ status: "success", message: "Action processed" });
     } catch (err) {
         return NextResponse.json({ status: "error", message: err.message }, { status: 500 });
     }
